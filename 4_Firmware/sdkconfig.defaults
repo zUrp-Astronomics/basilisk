@@ -1,0 +1,55 @@
+# SOURCE: ticket #138 — le sdkconfig.defaults de la v1 (archivée dans l'atelier, sources/firmware-v1/), repris pour la même carte
+# AUTHOR: engineer
+# DATE: 2026-09-27
+# STATUS: actif — lu par 4_Firmware/build.sh ; le sdkconfig est généré dans 4_Firmware/build, jamais versionné ;
+#         ticket #168 : pile de app_main ; ticket #220 : les rappels d'esp_timer en interruption ;
+#         ticket #528 : la panique du chien de garde, l'ISR de l'UART en IRAM
+#
+# Seeed XIAO ESP32S3 — banc de test monture E
+CONFIG_IDF_TARGET="esp32s3"
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+# Console : USB natif (CDC via USB Serial/JTAG), réservé au protocole (PROTOCOL.md) : la carte ne
+# parle jamais la première. Aucun journal ESP ni bootloader n'y passe (v1, sdkconfig.defaults:8-12).
+# La ligne CONFIG_LOG_MAXIMUM_LEVEL_NONE=y de la v1 n'est pas reprise : ESP-IDF 5.3.2 ne connaît pas
+# ce symbole (« unknown kconfig symbol ») ; le maximum y vaut le niveau par défaut
+# (LOG_MAXIMUM_EQUALS_DEFAULT), donc 0. build.sh vérifie les trois niveaux à 0 sur le build.
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+CONFIG_ESP_CONSOLE_SECONDARY_NONE=y
+CONFIG_LOG_DEFAULT_LEVEL_NONE=y
+CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
+
+# Pas de PSRAM nécessaire ; tout en RAM interne, déterministe.
+CONFIG_SPIRAM=n
+
+# FreeRTOS : tick 1 kHz pour des délais courts propres.
+CONFIG_FREERTOS_HZ=1000
+
+# Pile de la tâche principale (app_main) : 6144 octets au lieu de 3584 (ticket #168). La couche HOTE et le
+# journal tournent sur la tâche de SESSION (bsk_host.h) : formatage de `t` et des lignes du journal (snprintf,
+# tampons de 320 et 255 octets). 6144 est la pile de la tâche qui les portait dans la v1 (usb_rx,
+# sources/firmware-v1/components/usb/usb.c:119 de l'atelier). Non mesuré sur la carte.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+
+# Chien de garde des tâches : on ne veut pas de tâche qui bloque sans le dire (ticket #528, audit S1). Initialisé au
+# démarrage (INIT : sans lui, l'abonnement d'une tâche, vérifié par ESP_ERROR_CHECK, arrête la carte à chaque démarrage) ;
+# une tâche abonnée qui ne le nourrit pas en 10 s redémarre la carte (PANIC ; sans elle, ESP-IDF 5.3.2 n'imprime qu'un
+# avertissement, sur une console muette, et la carte reste figée). DEBUG dit alors reset=task_wdt (PROTOCOL.md § 3).
+# Les tâches abonnées, et pourquoi les autres ne le sont pas : main/main.c, components/phy/phy.c,
+# components/store/store.c, components/host/host_usb.c. build.sh vérifie INIT et PANIC sur le build.
+CONFIG_ESP_TASK_WDT_EN=y
+CONFIG_ESP_TASK_WDT_INIT=y
+CONFIG_ESP_TASK_WDT_PANIC=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
+
+# L'ISR de l'UART en IRAM (ticket #528, audit M3) : pendant une écriture de la marque en NVS, le cache de la flash est
+# coupé ; l'ISR en flash attendrait, le FIFO de réception (128 octets, 1,7 ms de fil à 750 kbaud) déborderait. En IRAM,
+# elle vide le FIFO dans le tampon de réception (4096 octets), qui absorbe le reste. Va avec ESP_INTR_FLAG_IRAM à
+# l'installation du pilote (components/phy/phy.c) : l'option place le code de l'ISR en IRAM, le drapeau laisse son
+# interruption active cache coupé ; l'un ne sert pas sans l'autre. build.sh vérifie l'option sur le build.
+CONFIG_UART_ISR_IN_IRAM=y
+
+# Ticket #220 : l'échéance de 2 ms de la retombée de XDETECT (components/phy/phy.c, drop_timer) est un esp_timer rappelé
+# en interruption (ESP_TIMER_ISR), sans tâche ni file ; ce mode n'existe qu'avec cette option (esp_timer.h).
+CONFIG_ESP_TIMER_SUPPORTS_ISR_DISPATCH_METHOD=y

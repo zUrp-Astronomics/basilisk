@@ -1,0 +1,5 @@
+# SOURCE: ticket #138 — le dossier de build ESP-IDF de firmware2 (4_Firmware/build.sh)
+# AUTHOR: engineer
+# DATE: 2026-09-27
+# STATUS: actif — rework PR #139 : dans 4_Firmware/, plutôt que dans le .gitignore racine, hors du périmètre du ticket
+build/

@@ -1,0 +1,7 @@
+# SOURCE: ticket #3 (CI réelle)
+# AUTHOR: engineer
+# DATE: 2026-09-23
+# STATUS: actif
+
+# Dépendance des tests hôte (npm install à la racine, voir package.json)
+node_modules/

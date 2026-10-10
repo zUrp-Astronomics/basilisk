@@ -1,0 +1,89 @@
+00:19:21.307 [app] carte : firmware 1.0
+00:19:21.374 [app] prêt : SAMYANG AF 135mm F1.8
+00:19:23.492 > LOG ON
+00:19:23.497 ok log=1 all=0
+00:19:26.218 * ring 12262 gesture pulses=-18 thirds=1 frames=18 capped=7
+00:19:27.518 * ring 13562 gesture pulses=45 thirds=3 frames=45 capped=19
+00:19:28.657 * ring 14696 gesture pulses=30 thirds=2 frames=30 capped=13
+00:19:30.537 * ring 16579 gesture pulses=8 thirds=2 frames=8 capped=2
+00:19:31.537 * ring 17579 gesture pulses=4 thirds=1 frames=4 capped=1
+00:19:32.737 * ring 18763 gesture pulses=2 thirds=1 frames=2 capped=0
+00:19:33.658 * ring 19696 gesture pulses=4 thirds=1 frames=4 capped=1
+00:19:34.297 * ring 20329 gesture pulses=9 thirds=1 frames=9 capped=3
+00:19:35.158 * ring 21196 gesture pulses=7 thirds=1 frames=7 capped=2
+00:19:37.337 * ring 23379 gesture pulses=10 thirds=2 frames=10 capped=3
+00:19:37.937 * ring 23979 gesture pulses=2 thirds=1 frames=2 capped=0
+00:19:39.918 * ring 25946 gesture pulses=16 thirds=2 frames=16 capped=6
+00:19:41.458 * ring 27496 gesture pulses=45 thirds=3 frames=45 capped=19
+00:19:44.518 * ring 30546 gesture pulses=50 thirds=3 frames=50 capped=22
+00:19:57.137 * ring 43179 gesture pulses=-170 thirds=22 frames=170 capped=62
+00:19:59.977 * ring 46013 gesture pulses=-3 thirds=0 frames=3 capped=0
+00:20:09.618 * ring 55646 gesture pulses=40 thirds=3 frames=40 capped=17
+00:20:11.177 * ring 57213 gesture pulses=-33 thirds=3 frames=33 capped=13
+00:20:17.417 * ring 63446 gesture pulses=24 thirds=2 frames=24 capped=10
+00:20:18.377 * ring 64413 gesture pulses=-19 thirds=2 frames=19 capped=7
+00:20:21.657 * ring 67696 gesture pulses=20 thirds=1 frames=20 capped=9
+00:20:22.737 * ring 68781 gesture pulses=-28 thirds=3 frames=28 capped=11
+00:20:23.557 * ring 69596 gesture pulses=29 thirds=2 frames=29 capped=12
+00:20:24.357 * ring 70396 gesture pulses=-20 thirds=2 frames=20 capped=8
+00:20:26.257 * ring 72296 gesture pulses=17 thirds=2 frames=17 capped=6
+00:20:27.136 * ring 73163 gesture pulses=-23 thirds=2 frames=23 capped=9
+00:20:27.717 * ring 73746 gesture pulses=7 thirds=1 frames=7 capped=2
+00:20:30.277 * ring 76313 gesture pulses=14 thirds=1 frames=14 capped=6
+00:20:46.649 > f15359
+00:20:46.653 ok
+00:20:46.656 * motion 92699 commanded
+00:20:46.676 * tx 92704 F0 1B 00 01 07 04 00 00 19 83 00 00 3D 00 00 00 01 00 00 1D FF 3B 00 00 58 02 55
+00:20:46.694 * motion 92714 moving
+00:20:47.276 * rx 93314 F0 32 00 01 2C 06 02 00 FA 3B 00 10 10 31 36 12 78 00 00 00 00 19 00 00 00 00 FA 3B 00 05 3D 00 00 00 00 00 00 00 00 06 00 00 00 00 00 1D 00 60 04 55
+00:20:47.278 * motion 93315 settling
+00:20:47.596 * motion 93631 arrived
+00:20:50.060 > js
+00:20:50.063 ok
+00:20:50.076 * mark 96110 set key=01030800bf087 pos=15354 dir=dec
+00:20:51.734 > f25726
+00:20:51.739 ok
+00:20:51.756 * motion 97784 commanded
+00:20:51.758 * tx 97787 F0 1B 00 01 48 04 00 00 19 83 00 00 3D 00 00 00 01 00 00 1D 7E 64 00 00 41 02 55
+00:20:51.760 * motion 97798 moving
+00:20:52.437 * rx 98481 F0 32 00 01 72 06 02 00 83 64 00 10 10 31 36 12 78 00 00 00 00 19 00 00 00 00 83 64 00 05 18 00 00 00 00 00 00 00 00 E0 E1 FD 00 00 00 1D 00 9D 06 55
+00:20:52.440 * motion 98481 settling
+00:20:52.757 * motion 98796 arrived
+00:20:54.017 * lens 100047 0x05[64]=08
+00:20:54.176 * lens 100213 0x05[64]=00
+00:20:54.178 * motion 100214 commanded
+00:20:54.179 * btn 100214 press=short result=ok
+00:20:54.180 * tx 100220 F0 1B 00 01 DA 04 00 00 19 83 00 00 3D 00 00 00 01 00 00 1D FA 3B 00 00 26 03 55
+00:20:54.196 * motion 100231 moving
+00:20:54.876 * rx 100914 F0 32 00 01 14 06 02 00 F5 3B 00 10 10 31 36 12 78 00 00 00 00 19 00 00 00 00 F5 3B 00 05 3D 00 00 00 00 00 00 00 00 20 20 07 00 00 00 1D 00 7F 04 55
+00:20:54.879 * motion 100915 settling
+00:20:55.196 * motion 101231 arrived
+00:20:57.297 * ring 103330 gesture pulses=30 thirds=2 frames=30 capped=13
+00:20:58.137 * ring 104163 gesture pulses=-18 thirds=2 frames=18 capped=7
+00:21:14.036 * ring 120080 gesture pulses=-23 thirds=2 frames=23 capped=9
+00:21:15.796 * ring 121831 gesture pulses=17 thirds=1 frames=17 capped=7
+00:21:16.736 * ring 122763 gesture pulses=6 thirds=1 frames=6 capped=2
+00:21:19.136 * ring 125163 gesture pulses=31 thirds=4 frames=31 capped=11
+00:21:20.616 * ring 126648 gesture pulses=-5 thirds=1 frames=5 capped=1
+00:21:24.916 * ring 130947 gesture pulses=107 thirds=9 frames=107 capped=44
+00:21:28.816 * ring 134848 gesture pulses=20 thirds=3 frames=20 capped=7
+00:21:31.436 * ring 137463 gesture pulses=-15 thirds=2 frames=15 capped=5
+00:21:44.536 * ring 150564 gesture pulses=-26 thirds=3 frames=26 capped=10
+00:21:46.436 * ring 152480 gesture pulses=20 thirds=3 frames=20 capped=7
+00:21:51.059 > f26995
+00:21:51.063 ok
+00:21:51.075 * motion 157110 commanded
+00:21:51.077 * tx 157121 F0 1B 00 01 20 04 00 00 19 83 00 00 3D 00 00 00 01 00 00 1D 73 69 00 00 13 02 55
+00:21:51.095 * motion 157131 moving
+00:21:51.856 * rx 157898 F0 32 00 01 4F 06 02 00 78 69 00 10 10 31 36 12 78 00 00 00 00 19 00 00 00 00 78 69 00 05 12 00 00 00 00 00 00 00 00 E1 E7 FF 00 00 00 1D 00 71 06 55
+00:21:51.858 * motion 157899 settling
+00:21:52.176 * motion 158215 arrived
+00:21:53.936 * lens 159964 0x05[64]=08
+00:21:54.055 * lens 160097 0x05[64]=00
+00:21:54.057 * motion 160098 commanded
+00:21:54.058 * btn 160098 press=short result=ok
+00:21:54.075 * tx 160104 F0 1B 00 01 D3 04 00 00 19 83 00 00 3D 00 00 00 01 00 00 1D FA 3B 00 00 1F 03 55
+00:21:54.078 * motion 160115 moving
+00:21:54.836 * rx 160881 F0 32 00 01 12 06 02 00 F5 3B 00 10 10 31 36 12 78 00 00 00 00 19 00 00 00 00 F5 3B 00 05 3D 00 00 00 00 00 00 00 00 20 19 01 00 00 00 1D 00 70 04 55
+00:21:54.838 * motion 160882 settling
+00:21:55.156 * motion 161198 arrived

@@ -1,0 +1,160 @@
+05:54:36.695 [app] carte : protocole 1.3
+05:54:36.737 [app] prêt : Samyang AF 135.0mm f/1.8-22 fw1.05 — focus par « samyang »
+05:54:38.036 > LOG ON
+05:54:38.039 ok log=1 all=0
+05:54:40.724 > b
+05:54:40.727 ok
+05:54:40.728 * boot lens=0 why=b
+05:54:40.728 * lens present=0
+05:54:40.729 * lens mf=0 0x05[62]=01
+05:54:40.729 * lens btn=00
+05:54:40.743 [app] objectif disparu
+05:54:41.326 * boot step=power logic=1 motor=1
+05:54:41.841 * std step=handshake result=LENS_CS_never_high hint=on_tente_le_0x01_quand_meme
+05:54:41.842 * tx 9523 F0 29 00 02 EF 01 FF FF FF FF FF FF FF 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 15 08 55
+05:54:41.847 * rx 9528 F0 29 00 02 00 01 FF 9F 38 5D A2 60 18 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 D7 03 55
+05:54:41.848 * std step=01 reply_len=33
+05:54:41.849 * tx 9529 F0 0A 00 02 00 07 00 13 00 55
+05:54:41.854 * rx 9535 F0 2B 00 02 00 07 01 03 70 01 00 01 05 00 00 08 00 00 00 00 00 60 92 86 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 8D 02 55
+05:54:41.855 * std step=07 reply_len=35
+05:54:41.855 * tx 9536 F0 11 00 02 01 08 02 00 00 00 00 00 00 00 1E 00 55
+05:54:41.865 * rx 9545 +0/210#517 F0 D2 00 02 00 08 BF 11 00 19 04 00 00 80 00 13 01 00 12 E1 01 03 01 35 00 00 18 00 00 00 19 00 00 00 00 00 00 16 00 00 00 00 00 00 00 00 E0 43 00 E0 FF 84 A4 00 00 08 32 25 40 2F 00 00 00 00
+05:54:41.866 * rx 9545 +64/210#517 00 00 00 43 25 04 32 00 00 00 00 00 00 00 F3 F3 07 FB FB 00 00 00 04 04 20 46 00 80 01 00 00 00 00 00 00 00 00 01 01 01 09 09 00 00 00 00 00 E6 80 DD 52 00 D0 DD DF F0 00 08 A0 DD E0 00 52 00
+05:54:41.867 * rx 9545 +128/210#517 10 10 00 00 00 00 00 00 00 00 00 84 64 27 00 06 10 FF 33 00 00 00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00 0C 0C 00 00 00 00 00 00 00 05 00 01 00 05 08 00 00 07 07 FF 00 00 00 00 00 00 00
+05:54:41.867 * rx 9545 +192/210#517 00 00 00 00 00 00 00 00 00 13 00 03 01 07 01 E7 1A 55
+05:54:41.868 * std step=08 body_flags=02 reply_len=202
+05:54:41.868 * tx 9547 F0 0B 00 02 02 0B 60 00 7A 00 55
+05:54:41.870 * rx 9551 F0 0B 00 02 00 0B 60 00 78 00 55
+05:54:41.871 * tx 9552 F0 0D 00 02 03 09 00 00 00 00 1B 00 55
+05:54:41.876 * rx 9557 F0 14 00 02 00 09 00 00 00 00 00 00 00 00 00 00 00 1F 00 55
+05:54:41.877 * tx 9558 F0 0A 00 02 04 0D 00 1D 00 55
+05:54:41.882 * rx 9563 F0 0A 00 02 00 0D 01 1A 00 55
+05:54:41.883 * std step=0B/09/0D ok
+05:54:41.884 * tx 9564 F0 0A 00 02 05 10 1F 40 00 55
+05:54:41.910 * lens mf=0 0x05[62]=01
+05:54:41.912 * lens btn=00
+05:54:42.095 * lens fnum_x10=18
+05:54:42.127 * lens pos=30988
+05:54:42.212 * lens fnum_x10=18
+05:54:42.245 * lens pos=28327
+05:54:42.361 * lens pos=15234
+05:54:42.461 * lens pos=30420
+05:54:42.577 * rx 10258 F0 0A 00 02 00 10 00 1C 00 55
+05:54:42.579 * homing done t=10258
+05:54:42.580 * lens pos=14623
+05:54:42.581 * tx 10259 F0 19 00 02 30 0A FF 7F 00 00 00 00 00 00 3F 00 00 00 00 00 00 00 12 02 55
+05:54:42.585 * rx 10265 F0 19 00 02 00 0A FF 7F 00 00 00 00 00 00 3F 00 00 00 00 00 00 00 E2 01 55
+05:54:42.587 * std step=0A ok
+05:54:42.588 * boot step=init done=1 loop=1 rx05=30
+05:54:42.590 * tx 10267 F0 1B 00 02 32 40 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E5 00 55
+05:54:42.648 * rx 10328 F0 1B 00 02 00 40 56 00 01 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B9 00 55
+05:54:42.653 * svc main=V version=1.05 data=01 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+05:54:42.654 * boot driver=samyang caps=identity,focus_pos,focus_goto,focus_home,focus_limits,moving,stop,aperture,focal,distance,calibrate
+05:54:42.656 * boot identity="Samyang AF 135.0mm f/1.8-22 fw1.05" version=1.05
+05:54:42.658 * boot step=home result=deja_fait (0x10 de l'init)
+05:54:42.660 * limits focal=135 source=nvs min=13723 max=30988 home=14591
+05:54:42.661 * boot step=calibrate result=stored source=nvs
+05:54:42.662 * boot caps=identity,focus_pos,focus_goto,focus_home,focus_limits,moving,stop,aperture,focal,distance,calibrate driver=samyang
+05:54:42.664 * tx 10334 F0 1B 00 02 37 40 4D 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E1 00 55
+05:54:42.695 * lens btn=00
+05:54:42.697 * ring mode=aperture source=0x05 0x05[62]=01
+05:54:42.715 * rx 10395 F0 1B 00 02 00 40 4D 00 26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 D0 00 55
+05:54:42.718 * svc main=M sub=00 data=26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+05:54:42.720 * lens switch_notify=ok astro=? hint=decide_a_la_premiere_bascule_M1_ou_au_premier_appui
+05:54:42.722 * lens present=1
+05:54:42.723 * boot result=ok attempts=2
+05:54:43.197 [app] prêt : Samyang AF 135.0mm f/1.8-22 fw1.05 — focus par « samyang »
+05:54:45.445 * lens std_move=-1
+05:54:45.547 * ring ap fnum_x10=18 source=board
+05:54:45.661 * lens std_move=0
+05:54:45.798 * ring ap fnum_x10=18 source=board
+05:54:45.802 * lens std_move=-1
+05:54:45.911 * lens std_move=0
+05:54:46.047 * ring ap fnum_x10=18 source=board
+05:54:46.447 * ring ap fnum_x10=18 source=board
+05:54:46.447 * lens std_move=-1
+05:54:46.578 * lens std_move=0
+05:54:46.647 * ring ap fnum_x10=18 source=board
+05:54:47.047 * ring ap fnum_x10=18 source=board
+05:54:47.048 * lens std_move=-1
+05:54:47.212 * lens std_move=0
+05:54:47.511 * ring gesture pulses=-13 (seuil 2 par tiers de diaph.)
+05:54:48.495 * lens std_move=-1
+05:54:48.595 * lens std_move=0
+05:54:48.647 * ring ap fnum_x10=18 source=board
+05:54:48.995 * lens std_move=1
+05:54:49.111 * lens std_move=0
+05:54:49.148 * ring ap fnum_x10=20 source=board
+05:54:49.212 * lens fnum_x10=20
+05:54:49.347 * ring ap fnum_x10=22 source=board
+05:54:49.352 * lens std_move=1
+05:54:49.447 * ring ap fnum_x10=25 source=board
+05:54:49.452 * lens fnum_x10=22
+05:54:49.597 * lens fnum_x10=25 std_move=0
+05:54:49.697 * ring ap fnum_x10=28 source=board
+05:54:49.703 * lens std_move=1
+05:54:49.812 * ring ap fnum_x10=32 source=board
+05:54:49.815 * lens fnum_x10=28
+05:54:49.929 * lens fnum_x10=32 std_move=0
+05:54:50.311 * ring gesture pulses=9 (seuil 2 par tiers de diaph.)
+05:54:51.165 * lens std_move=1
+05:54:51.248 * ring ap fnum_x10=35 source=board
+05:54:51.280 * lens fnum_x10=35 std_move=0
+05:54:51.446 * lens std_move=1
+05:54:51.578 * lens std_move=0
+05:54:51.647 * ring ap fnum_x10=40 source=board
+05:54:51.678 * lens fnum_x10=40
+05:54:51.795 * lens std_move=1
+05:54:51.910 * lens std_move=0
+05:54:52.198 * ring ap fnum_x10=45 source=board
+05:54:52.203 * lens std_move=1
+05:54:52.311 * lens fnum_x10=45 std_move=0
+05:54:52.611 * ring gesture pulses=6 (seuil 2 par tiers de diaph.)
+05:54:52.795 * lens std_move=1
+05:54:52.911 * lens std_move=0
+05:54:53.047 * ring ap fnum_x10=50 source=board
+05:54:53.050 * lens std_move=1
+05:54:53.162 * lens fnum_x10=50 std_move=0
+05:54:53.461 * ring gesture pulses=2 (seuil 2 par tiers de diaph.)
+05:54:53.795 * lens std_move=1
+05:54:53.911 * lens std_move=0
+05:54:53.947 * ring ap fnum_x10=56 source=board
+05:54:54.012 * lens fnum_x10=56
+05:54:54.345 * ring gesture pulses=2 (seuil 2 par tiers de diaph.)
+05:54:54.645 * lens std_move=1
+05:54:54.762 * ring ap fnum_x10=63 source=board
+05:54:54.879 * lens fnum_x10=63 std_move=0
+05:54:55.195 * ring gesture pulses=2 (seuil 2 par tiers de diaph.)
+05:54:55.445 * lens std_move=1
+05:54:55.498 * ring ap fnum_x10=71 source=board
+05:54:55.561 * lens fnum_x10=71 std_move=0
+05:54:55.661 * lens std_move=1
+05:54:55.779 * lens std_move=0
+05:54:56.078 * ring gesture pulses=3 (seuil 2 par tiers de diaph.)
+05:54:58.062 * lens std_move=1
+05:54:58.210 * lens std_move=0
+05:54:58.478 * ring gesture pulses=1 (seuil 2 par tiers de diaph.)
+05:54:59.912 * lens std_move=1
+05:54:59.948 * ring ap fnum_x10=80 source=board
+05:55:00.029 * lens fnum_x10=80 std_move=0
+05:55:00.314 * ring ap fnum_x10=90 source=board
+05:55:00.317 * lens std_move=1
+05:55:00.446 * lens fnum_x10=90 std_move=0
+05:55:00.797 * ring ap fnum_x10=100 source=board
+05:55:00.799 * lens std_move=1
+05:55:00.914 * ring ap fnum_x10=110 source=board
+05:55:00.916 * lens fnum_x10=100
+05:55:01.045 * lens fnum_x10=110 std_move=0
+05:55:01.262 * lens std_move=1
+05:55:01.314 * ring ap fnum_x10=130 source=board
+05:55:01.379 * lens fnum_x10=130 std_move=0
+05:55:01.464 * ring ap fnum_x10=140 source=board
+05:55:01.495 * lens fnum_x10=140
+05:55:01.878 * ring gesture pulses=12 (seuil 2 par tiers de diaph.)
+05:55:01.961 * lens std_move=1
+05:55:02.014 * ring ap fnum_x10=160 source=board
+05:55:02.095 * lens fnum_x10=160 std_move=0
+05:55:02.361 * lens std_move=1
+05:55:02.464 * ring ap fnum_x10=180 source=board
+05:55:02.579 * lens fnum_x10=180 std_move=0
+05:55:02.894 * ring gesture pulses=4 (seuil 2 par tiers de diaph.)

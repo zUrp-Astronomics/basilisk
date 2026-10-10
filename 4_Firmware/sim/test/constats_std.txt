@@ -1,0 +1,24 @@
+# SOURCE: les scénarios de test_std contre le faux F051 dont l'attendu, écrit d'après la référence, n'est pas tenu
+# AUTHOR: engineer
+# DATE: 2026-09-29
+# STATUS: actif — lu par sim/test/test_std.c (chemin donné par 4_Firmware/run.sh, et par mutants.sh pour la copie mutée)
+# Les constats : un écart connu, inscrit avec sa raison et sa citation ; ni le firmware ni le modèle ne sont corrigés ici.
+#
+# Un bloc par scénario, séparé par une ligne vide :
+#   @ <nom du scénario, tel que test_std.c le déclare>
+#   = <raison : ce que le firmware (ou le modèle) fait, contre l'attendu>   (une ou plusieurs lignes)
+#   § <citation>                                                          (une ou plusieurs lignes)
+# test_std échoue si un scénario en échec n'est pas ici, si un scénario d'ici passe (le constat est réglé : il sort de
+# la liste), si un bloc ne nomme aucun scénario, ou s'il n'a pas de raison ou pas de citation.
+
+@ reste_alimente
+= Le premier 0x01 n'est pas reçu comme un 0x01 : au lieu de 02 02 FF 04, le F051 rend 02 FF FF 01 puis 02 FF FF 03. La
+= poignée de main du firmware finit par BODY_CS basse et le 0x01 la relève aussitôt ; liaison ouverte, le F051 clôt à
+= la retombée un emplacement vide (longueur 0 lue dans l'anneau), dont le traitement, 500 µs plus tard, lit les octets
+= du 0x01 encore incomplets (code 1) et en écrase les octets 3 et 5 ; le 0x01 complet, dans le même emplacement, échoue
+= ensuite à sa somme (code 3). Ce que le vrai F051 fait d'un emplacement de longueur 0 n'est pas établi : modèle ou
+= firmware, à arbitrer. C'est la seule cause qui reste : les deuxième et troisième 0x01 reçoivent 02 02 FF 04, le
+= reset soft ramène la phase init, l'init y est servie et le firmware atteint READY, à la position du flux, sans FAULT
+= (reste_alimente_reset).
+§ 7_Docs/E-Mount/tamron.md § 2.3, § 2.8, § 8, § 10 ; lens_std.c « Couche physique », lstd_body_cs, dispatch
+§ (classe et type FF, § 2.3) ; test_std.c:reste_alimente_reset

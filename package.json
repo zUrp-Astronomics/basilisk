@@ -1,0 +1,8 @@
+{
+  "name": "emount-bench-host-tests",
+  "private": true,
+  "description": "Dépendance des tests de la page de banc : test_app.js pilote la page dans Chromium via Playwright. Version épinglée : voir ## Gotchas du CLAUDE.md.",
+  "devDependencies": {
+    "playwright": "1.49.1"
+  }
+}

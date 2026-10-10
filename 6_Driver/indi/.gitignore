@@ -1,0 +1,5 @@
+# SOURCE: le build du driver INDI (build.sh, cmake)
+# AUTHOR: engineer
+# DATE: 2026-10-03
+# STATUS: actif
+build/

@@ -1,0 +1,26 @@
+Basilisk Focuser - Main board v1.0
+zUrp Astronomics - lordzurp.dev@gmail.com
+Projet : https://github.com/zUrp-Astronomics/basilisk
+
+FICHIERS
+  1-Schematics.pdf   schéma
+  2-Views.png        vues dessus / dessous / 3D
+  3-Gerber.zip       Gerbers RS-274X + perçages Excellon
+  4-BoM.xlsx         nomenclature, références LCSC
+  5-PnP.xlsx         placement, coordonnées en mm
+
+PCB
+  Couches      : 2
+  Dimensions   : 50.87 x 36.3 mm, contour en anneau (voir GKO)
+  Épaisseur    : 1.0 mm
+  Cuivre       : 1 oz
+  Vernis       : noir      Sérigraphie : blanc
+  Finition     : HASL ROHS
+
+ASSEMBLAGE
+  Face         : dessus uniquement
+  Composants   : 23 lignes BoM, 70 placements
+  Non montés   : 10
+
+POINT D'ATTENION
+CN2 n'est pas cablé, remplacé par P1-P10 (pogo-pin unitaire)

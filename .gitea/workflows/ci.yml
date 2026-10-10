@@ -1,0 +1,224 @@
+# SOURCE: scaffold LCARS (priv/catalogue/project_template/main/), réécrit en CI réelle
+# AUTHOR: engineer
+# DATE: 2026-09-23
+# STATUS: actif — la suite du projet ; la sonde probe-test-relevance.yml rejoue le job `test`
+name: CI
+
+# Quatre jobs, et plus aucun placeholder. Chaque étape appelle le script d'entrée d'un composant, qui
+# vit dans ce composant et résout ses chemins depuis sa propre place : la CI ne connaît de l'arbre que
+# le nom de ces scripts.
+#   - `test`  : les tests de la page de banc (5_App/run.sh — la première commande de `## Test` du
+#               CLAUDE.md) : test_app_vm.cjs, test_app.js ; puis le test de l'outil tool_station
+#               (5_App/tool_station/run.sh) ;
+#   - `indi`  : le driver INDI 6_Driver/indi/ compilé ET lié par son CMakeLists.txt, contre la libindi-dev
+#               d'Ubuntu 24.04 (1.9.9) ; rien n'y est testé ;
+#   - `firmware` : le firmware : ses en-têtes partagés compilés, le faux
+#               Samyang AF 135 compilé, ses tests de comportements et de pannes, son rejeu contre
+#               les traces de l'objectif (4_Firmware/run.sh) ;
+#   - `firmware-build` : le firmware construit par ESP-IDF 5.3.2 pour esp32s3, console
+#               muette vérifiée sur le build (4_Firmware/build.sh).
+#
+# ⚠ LE WORKFLOW S'APPELLE `CI` ET DOIT LE RESTER. Gitea compose le contexte d'un statut ainsi :
+# `<workflow> / <job> (<déclencheur>)` → `CI / test (push)`, `CI / firmware-build (pull_request)`…
+# tous sous le glob `CI / *` exigé par la protection de `main`. L'ancien job `no-harness-yet` a
+# disparu exprès : sa disparition est le signal, lu par la fleet, que le projet a posé sa suite.
+#
+# ⚠ POURQUOI `container:` ET PAS `runs-on: <label-gras>`. Le label `shell` est le contrat MINIMAL
+# que tout runner LCARS sert (le déploiement de référence le mappe sur `alpine:3.20` — pas de node,
+# pas de git, pas de bash). `container:` fait tirer l'image nommée quelle que soit la config du
+# label ; le runner la cache, seul le premier job d'un runner neuf paie le téléchargement.
+#
+# ⚠ AUCUN JOB NE SE NEUTRALISE POUR OBTENIR LE VERT : ni `continue-on-error`, ni `|| true`, ni
+# `if: false`. Un vert obtenu en masquant un job, ou en compilant la mauvaise configuration, est pire
+# que pas de CI.
+#
+# Le runner joue le `ci.yml` du commit TESTÉ : corriger ce fichier dans sa branche et repousser
+# suffit, rien à merger d'abord.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ── Suite hôte ──
+  # Image de référence de gitea/act : node (donc `actions/checkout@v4`), python3, bash, git, gcc.
+  # ⚠ LA SONDE (probe-test-relevance.yml) DOIT TOURNER DANS LA MÊME IMAGE ET LE MÊME OUTILLAGE
+  # (.gitea/setup_host.sh) : changer l'un ici, c'est changer l'autre là-bas dans le même geste.
+  test:
+    runs-on: shell
+    container: catthehacker/ubuntu:act-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            /opt/pw-browsers
+            node_modules
+          key: playwright-${{ hashFiles('package.json') }}
+      # gcc, le module playwright (node_modules/ à la racine) et Chromium sous /opt/pw-browsers —
+      # hors de $HOME, pour que la sonde les trouve aussi sous `env -i` avec un HOME vierge.
+      - name: Outillage (gcc, Playwright, Chromium)
+        run: bash .gitea/setup_host.sh
+      - name: Tests de la page de banc (5_App/run.sh)
+        run: bash 5_App/run.sh
+      - name: Test de l'outil tool_station (5_App/tool_station/run.sh)
+        run: bash 5_App/tool_station/run.sh
+
+  # ── Driver INDI ──
+  # Compile ET lie 6_Driver/indi/ par son CMakeLists.txt, tel que son README le prescrit (cmake puis make),
+  # par 6_Driver/indi/build.sh. Aucun test fonctionnel : « le driver compile et se lie » est tout ce que ce job affirme.
+  # ⚠ IMAGE `ubuntu:24.04`, PAS `catthehacker/ubuntu:act-latest` : act-latest est une étiquette
+  # mobile (Ubuntu 24.04 au 2026-09-26 : titre `act-24.04-amd64` de l'image du 2026-08-15), et la
+  # version de libindi-dev qu'apt y trouve changerait avec elle, sans commit. `ubuntu:24.04` fixe la version jugée : libindi 1.9.9
+  # (1.9.9+dfsg-3build3, universe de noble). Le prix : ni node ni git dans l'image, donc pas
+  # d'`actions/checkout` — git vient d'apt, puis un clone manuel (ci-dessous).
+  indi:
+    runs-on: shell
+    container: ubuntu:24.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # pkg-config et make sont nommés : CMakeLists.txt passe par pkg-config (libindi-dev n'y
+      # dépend pas, et n'expédie pas de FindINDI.cmake), et make n'est qu'une recommandation de
+      # cmake, que --no-install-recommends ne tire pas.
+      - name: Outillage (git, cmake, make, g++, pkg-config, libindi-dev)
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends ca-certificates git cmake make g++ pkg-config libindi-dev >/dev/null
+          echo "libindi $(pkg-config --modversion libindi), $(g++ --version | head -n 1), $(cmake --version | head -n 1)"
+      # Clone manuel avec le jeton du job (pas d'`actions/checkout`, action JS node20 : ni cette image
+      # ni l'image espressif/idf ne garantissent node). Le jeton passe par un en-tête HTTP (comme le
+      # fait actions/checkout), jamais dans l'URL : il n'est ni écrit dans .git/config ni recraché
+      # par un message d'erreur de git. Le commit récupéré est comparé à GITHUB_SHA : on ne compile
+      # jamais un autre commit.
+      - name: Récupérer le commit testé
+        env:
+          FORGE_TOKEN: ${{ github.token }}
+        run: |
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$FORGE_TOKEN" | base64 -w0)"
+          git config --global --add safe.directory '*'
+          git init -q .
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          recup() { git -c http.extraHeader="$auth" -c protocol.version=2 fetch -q --no-tags --depth=1 origin "$1"; }
+          if ! recup "$GITHUB_SHA"; then
+            echo "récupération par sha refusée par la forge ; repli sur la ref ${GITHUB_REF}"
+            recup "$GITHUB_REF"
+          fi
+          obtenu=$(git rev-parse FETCH_HEAD)
+          if [ "$obtenu" != "$GITHUB_SHA" ]; then
+            echo "commit récupéré ${obtenu} ≠ commit testé ${GITHUB_SHA} : on ne compile pas autre chose" >&2
+            exit 1
+          fi
+          git checkout -q --detach FETCH_HEAD
+          git log -1 --oneline
+      - name: Compiler et lier 6_Driver/indi/ (6_Driver/indi/build.sh)
+        run: bash 6_Driver/indi/build.sh
+
+  # ── Firmware, build ESP-IDF ──
+  # 4_Firmware/build.sh : le projet ESP-IDF de 4_Firmware/ (PHY réelle, bench_core, app_main), cible
+  # esp32s3, avec la même récupération du commit que le job `indi` ; il échoue si le build ne porte
+  # pas la console muette (journal et bootloader à 0). À chaque run, PR comprises, il publie
+  # l'artefact `firmware`.
+  firmware-build:
+    runs-on: shell
+    container: espressif/idf:v5.3.2
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # Même récupération que le job `indi` (voir là-bas pourquoi le jeton passe par un en-tête).
+      - name: Récupérer le commit testé
+        env:
+          FORGE_TOKEN: ${{ github.token }}
+        run: |
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$FORGE_TOKEN" | base64 -w0)"
+          git config --global --add safe.directory '*'
+          git init -q .
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          recup() { git -c http.extraHeader="$auth" -c protocol.version=2 fetch -q --no-tags --depth=1 origin "$1"; }
+          if ! recup "$GITHUB_SHA"; then
+            echo "récupération par sha refusée par la forge ; repli sur la ref ${GITHUB_REF}"
+            recup "$GITHUB_REF"
+          fi
+          obtenu=$(git rev-parse FETCH_HEAD)
+          if [ "$obtenu" != "$GITHUB_SHA" ]; then
+            echo "commit récupéré ${obtenu} ≠ commit testé ${GITHUB_SHA} : on ne compile pas autre chose" >&2
+            exit 1
+          fi
+          git checkout -q --detach FETCH_HEAD
+          git log -1 --oneline
+      # L'image fixe IDF_PATH mais son entrypoint (qui source export.sh) est court-circuité par le
+      # runner : on charge l'environnement ESP-IDF nous-mêmes.
+      - name: Build ESP-IDF (firmware)
+        run: |
+          . "$IDF_PATH/export.sh" > /dev/null
+          bash 4_Firmware/build.sh
+      - name: node pour upload-artifact (absent de l'image IDF)
+        run: |
+          set -euo pipefail
+          v=v20.18.0; f=node-$v-linux-x64.tar.xz
+          cd /tmp
+          curl -fsSLO "https://nodejs.org/dist/$v/$f"
+          curl -fsSL "https://nodejs.org/dist/$v/SHASUMS256.txt" | grep " $f\$" | sha256sum -c -
+          tar -xJf "$f" -C /usr/local --strip-components=1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            4_Firmware/build/*.bin
+            4_Firmware/build/bootloader/bootloader.bin
+            4_Firmware/build/partition_table/partition-table.bin
+            4_Firmware/build/flash_args
+          if-no-files-found: error
+
+  # ── Firmware ──
+  # 4_Firmware/run.sh : les en-têtes partagés du firmware compilés un par un, puis le faux
+  # Samyang AF 135 compilé sans avertissement, ses tests (comportements de la référence, pannes
+  # reçues et émises) et son rejeu contre les traces de l'objectif. gcc seul suffit.
+  # ⚠ IMAGE `ubuntu:24.04`, comme le job `indi` et pour la même raison : le compilateur jugé
+  # (gcc 13 de noble) ne change pas sans commit, et -Werror ne rougit pas sur une montée d'image.
+  # Ni node ni git dans l'image : git vient d'apt, puis le même clone manuel que le job `indi`.
+  firmware:
+    runs-on: shell
+    container: ubuntu:24.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Outillage (git, gcc)
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends ca-certificates git gcc libc6-dev >/dev/null
+          gcc --version | head -n 1
+      # Même récupération que le job `indi` (voir là-bas pourquoi le jeton passe par un en-tête).
+      - name: Récupérer le commit testé
+        env:
+          FORGE_TOKEN: ${{ github.token }}
+        run: |
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$FORGE_TOKEN" | base64 -w0)"
+          git config --global --add safe.directory '*'
+          git init -q .
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          recup() { git -c http.extraHeader="$auth" -c protocol.version=2 fetch -q --no-tags --depth=1 origin "$1"; }
+          if ! recup "$GITHUB_SHA"; then
+            echo "récupération par sha refusée par la forge ; repli sur la ref ${GITHUB_REF}"
+            recup "$GITHUB_REF"
+          fi
+          obtenu=$(git rev-parse FETCH_HEAD)
+          if [ "$obtenu" != "$GITHUB_SHA" ]; then
+            echo "commit récupéré ${obtenu} ≠ commit testé ${GITHUB_SHA} : on ne compile pas autre chose" >&2
+            exit 1
+          fi
+          git checkout -q --detach FETCH_HEAD
+          git log -1 --oneline
+      - name: firmware (en-têtes, faux 135, tests de pannes, rejeu)
+        run: bash 4_Firmware/run.sh

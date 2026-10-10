@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>emount-bench</title>
+<style>
+:root{
+  --bg:#14171a; --panel:#1c2126; --panel2:#232a30; --line:#2f3841; --ink:#e6ebef; --ink2:#9aa7b2;
+  --acc:#4fd1a5; --acc2:#f0b35a; --bad:#f07a6a; --tx:#8ab4f8; --rx:#4fd1a5; --ev:#f0b35a;
+  --mono:"Cascadia Code","JetBrains Mono",Consolas,"Courier New",monospace;
+  --sans:"Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;display:grid;grid-template-rows:auto 1fr;gap:0}
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.02em}
+header .sub{color:var(--ink2);font-size:12px}
+.spacer{flex:1}
+.dot{width:10px;height:10px;border-radius:50%;background:#555;display:inline-block;margin-right:6px}
+.dot.on{background:var(--acc)}
+main{display:grid;grid-template-columns:400px minmax(0,1fr);gap:0;min-height:0}
+aside{border-right:1px solid var(--line);overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px;background:var(--panel)}
+section.box{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:10px}
+section.box h2{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-weight:600}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+button{background:#2b333b;color:var(--ink);border:1px solid #3b4650;border-radius:4px;padding:6px 10px;font:inherit;cursor:pointer}
+button:hover{background:#354049}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--acc);color:#0d1a15;border-color:transparent;font-weight:600}
+button.warn{border-color:var(--acc2);color:var(--acc2)}
+button.danger{border-color:var(--bad);color:var(--bad)}
+input[type=text],input[type=number],select{background:#12161a;color:var(--ink);border:1px solid #3b4650;border-radius:4px;padding:6px 8px;font:inherit}
+input[type=number]{width:96px}
+.slider{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;margin:6px 0}
+.slider input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
+.slider .val{font-family:var(--mono);font-size:13px;color:var(--ink);min-width:88px;text-align:right}
+.slider .scale{grid-column:1;position:relative;height:26px;font-family:var(--mono);font-size:10px;color:var(--ink2)}
+.slider .scale span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;text-align:center}
+.slider .scale span:nth-child(2){transform:none;text-align:left}
+.slider .scale span:last-child{transform:translateX(-100%);text-align:right}
+.stops{grid-column:1;position:relative;height:14px;font-family:var(--mono);font-size:10px;color:var(--ink2)}
+.stops span{position:absolute;top:0;transform:translateX(-50%)}
+.stops span:first-child{transform:none}.stops span:last-child{transform:translateX(-100%)}
+.slider.pending .val{color:var(--acc2)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-family:var(--mono);font-size:12px}
+.kv b{color:var(--ink2);font-weight:500}
+.kv span{color:var(--ink)}
+.big{font-family:var(--mono);font-size:22px;color:var(--acc);margin:4px 0}
+.content{display:grid;grid-template-rows:auto 1fr auto;min-height:0}
+.toolbar{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--panel)}
+.toolbar label{color:var(--ink2);font-size:12px;display:flex;align-items:center;gap:4px}
+#log{overflow:auto;font-family:var(--mono);font-size:12px;padding:6px 12px;line-height:1.45}
+.l{white-space:pre-wrap;word-break:break-all;border-bottom:1px solid #1e2429;padding:1px 0}
+.l .t{color:#6c7883;margin-right:8px}
+.l.tx{color:var(--tx)} .l.rx{color:var(--rx)} .l.ev{color:var(--ev)} .l.err{color:var(--bad)} .l.ok{color:#c9d1d9} .l.cmd{color:#fff;background:#232a30}
+.l .dec{color:#d9e2ea}
+.l .fld{color:#ffd580}
+.l .n{color:var(--acc2);font-weight:600;margin-left:6px}
+.cli{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--line);background:var(--panel)}
+.cli input{flex:1;font-family:var(--mono)}
+.hint{color:var(--ink2);font-size:12px}
+.note{background:#2b2320;border:1px solid #5a4a2e;color:#f3d9a4;padding:8px 10px;border-radius:6px;font-size:12px}
+details summary{cursor:pointer;color:var(--ink2);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>emount-bench</h1>
+  <span class="sub">objectif Sony E · un protocole (PROTOCOL.md) · poll 5 Hz</span>
+  <span class="spacer"></span>
+  <span id="connDot" class="dot"></span><span id="connTxt" class="hint">déconnecté</span>
+  <button id="btnConnect" class="primary">Connecter</button>
+  <button id="btnDisconnect" disabled>Déconnecter</button>
+</header>
+<main>
+<aside>
+  <div class="note" id="serialNote" hidden>Ce navigateur n'a pas Web Serial (Chrome, Edge ou Opera sur ordinateur).</div>
+
+  <section class="box">
+    <h2>Objectif <span class="hint" id="s_state">—</span></h2>
+    <div class="kv">
+      <b>identité</b><span id="s_id">—</span>
+      <b>lettres</b><span id="s_caps">—</span>
+      <b>carte</b><span id="s_board">—</span>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="btnReboot" class="warn" title="b : oublier l'objectif et refaire toute la séquence de démarrage, sans couper l'alim (en fault : coupée puis rétablie, si câblée)">Redémarrer l'objectif</button>
+      <button id="btnPowerOff" class="danger" title="p0 : couper les deux alimentations (si câblées)">Alim OFF</button>
+      <button id="btnPowerOn" title="p1 : rétablir (l'objectif reboote tout seul)">Alim ON</button>
+      <span class="hint" id="s_power"></span>
+    </div>
+  </section>
+
+  <section class="box" id="secFocus">
+    <h2>Focus</h2>
+    <div class="big"><span id="s_focus">—</span> <span class="hint">pas</span> <span class="hint" id="s_moving"></span></div>
+    <div class="hint" id="s_move" style="color:var(--bad)"></div>
+    <div class="row">
+      <button id="btnFm100">−100</button><button id="btnFm10">−10</button>
+      <button id="btnFp10">+10</button><button id="btnFp100">+100</button>
+      <button id="btnStop" class="danger" title="q : arrêt du mouvement en cours, ou du retour à la marque qui finit un démarrage ; le homing ne s'interrompt pas (er busy home)">Stop</button>
+      <button id="btnMarkSet" title="js : mémorise la position focus courante comme marque de cet objectif à cette focale (dans la carte) — aussi : bouton du fût tenu 1 à 4 s (mode normal seulement)">Marquer</button>
+      <button id="btnMarkGo" title="jg : va à la marque — aussi : appui court sur le bouton du fût (mode normal seulement)">Aller à la marque</button>
+    </div>
+    <div class="slider" id="focusSlider">
+      <input type="range" id="focusRange" min="0" max="65535" step="1" value="0" disabled>
+      <span class="val" id="focusRangeVal">—</span>
+      <div class="scale"><span id="scHome" style="left:0;top:0;color:var(--acc);display:none">▲ ∞</span><span id="scMark" style="left:0;top:0;color:var(--warn,#c80);display:none">▲ marque</span><span id="scMin" style="left:0;top:13px">bornes inconnues</span><span id="scMax" style="left:100%;top:13px"></span></div>
+    </div>
+    <div class="row">
+      <input type="number" id="focusTarget" value="0" min="0" max="65535">
+      <button id="btnFgoto">Aller à</button>
+    </div>
+    <div class="hint" id="focusHint">Bornes publiées par l'objectif (r), rien n'est codé en dur.</div>
+  </section>
+
+  <section class="box" id="secIris">
+    <h2>Ouverture <span class="hint" id="irisBy"></span></h2>
+    <div class="big"><span id="s_fnum">f/—</span> <span class="hint" id="s_irange">—</span></div>
+    <div class="slider" id="irisSlider">
+      <input type="range" id="irisRange" min="0" max="21" step="1" value="0">
+      <span class="val" id="irisRangeVal">f/—</span>
+      <div class="stops"></div>
+    </div>
+    <div class="row">
+      <button id="btnIopen">Pleine ouverture</button>
+      <button id="btnIm">−⅓</button><button id="btnIp">+⅓</button>
+    </div>
+    <div class="hint">Tiers de diaph. entre les bornes lues sur l'objectif (a) ; la valeur affichée est celle que l'objectif rapporte (o), pas la consigne.</div>
+  </section>
+
+  <details id="bench">
+  <summary class="hint">Banc — la ligne t de la carte</summary>
+  <section class="box">
+    <div class="hint" id="s_t">—</div>
+  </section>
+  </details>
+</aside>
+
+<div class="content">
+  <div class="toolbar">
+    <label><input type="checkbox" id="fPoll" checked> afficher le poll (f/e/o…)</label>
+    <label><input type="checkbox" id="fFrames" checked> décoder les trames</label>
+    <span class="spacer"></span>
+    <button id="btnLogOn" title="LOG ON : la carte journalise ce qu'elle fait (« * session », « * motion », « * restore »…) et les trames non périodiques « * rx / * tx »">LOG ON</button>
+    <button id="btnLogAll" title="LOG ALL : chaque trame, les périodiques comprises (0x02, 0x03/0x04, 0x05/0x06 à chaque VD). firmware2 : aucune perdue à 60 Hz, chacune avec son instant ; une trame de la boucle n'y porte que ce qui a changé depuis la précédente de son type (« ~05 60=01 » : l'offset 60 vaut 01 ; « ~03 » seul : identique), la page la reconstruit et la décode ; « * lost » dit des lignes perdues. Firmware v1 : 30 lignes/s au plus, l'excédent est compté">LOG ALL</button>
+    <button id="btnLogOff" title="LOG OFF : la carte se tait">LOG OFF</button>
+    <button id="btnClear">Effacer</button>
+    <button id="btnExport">Exporter</button>
+  </div>
+  <div id="log"></div>
+  <form class="cli" id="cli">
+    <input type="text" id="cliIn" placeholder="commande (t, f16400, a5.6, DEBUG, :GP#…)" autocomplete="off">
+    <button type="submit">Envoyer</button>
+  </form>
+</div>
+</main>
+
+<script>
+'use strict';
+/* ───────────── Tables de messages (Samyang AF135, rapport 01) ─────────────
+ * 0x1B deplace l'iris sur le 135
+ * (7_Docs/E-Mount/samyang.md § 4.9), 0x02 est le refus (7_Docs/E-Mount/tamron.md § 2.3), 0x1F n'a pas de
+ * role etabli (msg1F). */
+const NAMES={0x01:'capabilities',0x02:'refus',0x03:'body-control',0x04:'frame-tick',0x05:'status-main',0x06:'status-focus',
+ 0x07:'init7',0x08:'body-info',0x09:'init9',0x0A:'info-groups',0x0B:'initB',0x0C:'speed-change',0x0D:'frame-rate',0x10:'homing',
+ 0x14:'FW-UPDATE-ARM',0x15:'FW-UPDATE-DATA',0x16:'sleep',0x17:'status17',0x19:'msg19',0x1B:'iris-move',0x1C:'af-stop',
+ 0x1D:'focus-drive',0x1E:'msg1E',0x1F:'msg1F',0x22:'steps-to-unit',0x26:'msg26',0x28:'msg28',0x2E:'unit-to-steps',0x2F:'echo',
+ 0x34:'msg34',0x35:'msg35',0x3A:'msg3A',0x3B:'msg3B',0x3C:'msg3C',0x3D:'msg3D',0x3E:'msg3E',0x3F:'msg3F',0x40:'SERVICE',0x4B:'msg4B',0x4C:'msg4C'};
+const SIZE_B2L={0x01:33,0x03:21,0x04:14,0x07:2,0x08:9,0x09:5,0x0A:17,0x0B:3,0x0C:2,0x0D:2,0x10:2,0x14:16,0x15:1032,0x16:2,0x19:2,0x1B:6,0x1C:1,0x1D:5,0x1E:5,0x1F:14,0x22:3,0x26:2,0x28:2,0x2E:3,0x2F:3,0x34:24,0x35:2,0x3A:24,0x3B:8,0x3C:8,0x3D:24,0x3E:9,0x3F:2,0x40:19,0x4B:3,0x4C:8};
+const SIZE_L2B={0x01:33,0x02:8,0x07:35,0x08:202,0x09:12,0x0A:17,0x0B:3,0x0C:2,0x0D:2,0x10:2,0x14:2,0x15:2,0x16:2,0x17:3,0x19:2,0x1B:11,0x1C:2,0x1D:2,0x1E:2,0x1F:2,0x22:3,0x26:5,0x28:36,0x2E:3,0x34:24,0x35:40,0x3A:24,0x3B:492,0x3C:4,0x3D:64,0x3E:12,0x3F:66,0x40:19,0x4B:2,0x4C:8};
+
+/* Noms par code LensType2 (0x07 octets 9-10), generes depuis ExifTool par 4_Firmware/gen_lens_names.py */
+/*LENS_NAMES_BEGIN*/const LENS_NAMES={1:"Sony LA-EA1 or Sigma MC-11 Adapter",2:"Sony LA-EA2 Adapter",3:"Sony LA-EA3 Adapter",6:"Sony LA-EA4 Adapter",7:"Sony LA-EA5 Adapter",13:"Samyang AF 35-150mm F2-2.8",17:"Samyang RS 21mm F3.5",18:"Samyang RS 28mm F3.5",19:"Samyang RS 32mm F2.8",20:"Samyang AF 35mm F1.4 P FE",21:"Samyang AF 14-24mm F2.8",22:"Samyang AF 24-60mm F2.8",24:"Samyang AF 85mm F1.8 P FE",44:"Metabones Canon EF Smart Adapter",78:"Metabones Canon EF Smart Adapter Mark III or Other Adapter",184:"Metabones Canon EF Speed Booster Ultra",234:"Metabones Canon EF Smart Adapter Mark IV",239:"Metabones Canon EF Speed Booster",24593:"LA-EA4r MonsterAdapter",32784:"Sony E 16mm F2.8",32785:"Sony E 18-55mm F3.5-5.6 OSS",32786:"Sony E 55-210mm F4.5-6.3 OSS",32787:"Sony E 18-200mm F3.5-6.3 OSS",32788:"Sony E 30mm F3.5 Macro",32789:"Sony E 24mm F1.8 ZA or Samyang AF 50mm F1.4",32790:"Sony E 50mm F1.8 OSS or Samyang AF 14mm F2.8",32791:"Sony E 16-70mm F4 ZA OSS",32792:"Sony E 10-18mm F4 OSS",32793:"Sony E PZ 16-50mm F3.5-5.6 OSS",32794:"Sony FE 35mm F2.8 ZA or Samyang Lens",32795:"Sony FE 24-70mm F4 ZA OSS",32796:"Sony FE 85mm F1.8 or Viltrox PFU RBMH 85mm F1.8",32797:"Sony E 18-200mm F3.5-6.3 OSS LE",32798:"Sony E 20mm F2.8",32799:"Sony E 35mm F1.8 OSS",32800:"Sony E PZ 18-105mm F4 G OSS",32801:"Sony FE 12-24mm F4 G",32802:"Sony FE 90mm F2.8 Macro G OSS",32803:"Sony E 18-50mm F4-5.6",32804:"Sony FE 24mm F1.4 GM",32805:"Sony FE 24-105mm F4 G OSS",32807:"Sony E PZ 18-200mm F3.5-6.3 OSS",32808:"Sony FE 55mm F1.8 ZA",32810:"Sony FE 70-200mm F4 G OSS",32811:"Sony FE 16-35mm F4 ZA OSS",32812:"Sony FE 50mm F2.8 Macro",32813:"Sony FE 28-70mm F3.5-5.6 OSS",32814:"Sony FE 35mm F1.4 ZA",32815:"Sony FE 24-240mm F3.5-6.3 OSS",32816:"Sony FE 28mm F2",32817:"Sony FE PZ 28-135mm F4 G OSS",32819:"Sony FE 100mm F2.8 STF GM OSS",32820:"Sony E PZ 18-110mm F4 G OSS",32821:"Sony FE 24-70mm F2.8 GM",32822:"Sony FE 50mm F1.4 ZA",32823:"Sony FE 85mm F1.4 GM or Samyang AF 85mm F1.4",32824:"Sony FE 50mm F1.8",32826:"Sony FE 21mm F2.8 (SEL28F20 + SEL075UWC)",32827:"Sony FE 16mm F3.5 Fisheye (SEL28F20 + SEL057FEC)",32828:"Sony FE 70-300mm F4.5-5.6 G OSS",32829:"Sony FE 100-400mm F4.5-5.6 GM OSS",32830:"Sony FE 70-200mm F2.8 GM OSS",32831:"Sony FE 16-35mm F2.8 GM",32848:"Sony FE 400mm F2.8 GM OSS",32849:"Sony E 18-135mm F3.5-5.6 OSS",32850:"Sony FE 135mm F1.8 GM",32851:"Sony FE 200-600mm F5.6-6.3 G OSS",32852:"Sony FE 600mm F4 GM OSS",32853:"Sony E 16-55mm F2.8 G",32854:"Sony E 70-350mm F4.5-6.3 G OSS",32855:"Sony FE C 16-35mm T3.1 G",32858:"Sony FE 35mm F1.8",32859:"Sony FE 20mm F1.8 G",32860:"Sony FE 12-24mm F2.8 GM",32862:"Sony FE 50mm F1.2 GM",32863:"Sony FE 14mm F1.8 GM",32864:"Sony FE 28-60mm F4-5.6",32865:"Sony FE 35mm F1.4 GM",32866:"Sony FE 24mm F2.8 G",32867:"Sony FE 40mm F2.5 G",32868:"Sony FE 50mm F2.5 G",32871:"Sony FE PZ 16-35mm F4 G",32873:"Sony E PZ 10-20mm F4 G",32874:"Sony FE 70-200mm F2.8 GM OSS II",32875:"Sony FE 24-70mm F2.8 GM II",32876:"Sony E 11mm F1.8",32877:"Sony E 15mm F1.4 G",32878:"Sony FE 20-70mm F4 G",32879:"Sony FE 50mm F1.4 GM",32880:"Sony FE 16mm F1.8 G",32881:"Sony FE 24-50mm F2.8 G",32882:"Sony FE 16-25mm F2.8 G",32884:"Sony FE 70-200mm F4 Macro G OSS II",32885:"Sony FE 16-35mm F2.8 GM II",32886:"Sony FE 300mm F2.8 GM OSS",32887:"Sony E PZ 16-50mm F3.5-5.6 OSS II",32888:"Sony FE 85mm F1.4 GM II",32889:"Sony FE 28-70mm F2 GM",32890:"Sony FE 400-800mm F6.3-8 G OSS",32891:"Sony FE 50-150mm F2 GM",32893:"Sony FE 100mm F2.8 Macro GM OSS",32895:"Sony FE 100-400mm F4.5 GM OSS",33072:"Sony FE 70-200mm F2.8 GM OSS + 1.4X Teleconverter",33073:"Sony FE 70-200mm F2.8 GM OSS + 2X Teleconverter",33076:"Sony FE 100mm F2.8 STF GM OSS (macro mode)",33077:"Sony FE 100-400mm F4.5-5.6 GM OSS + 1.4X Teleconverter",33078:"Sony FE 100-400mm F4.5-5.6 GM OSS + 2X Teleconverter",33079:"Sony FE 400mm F2.8 GM OSS + 1.4X Teleconverter",33080:"Sony FE 400mm F2.8 GM OSS + 2X Teleconverter",33081:"Sony FE 200-600mm F5.6-6.3 G OSS + 1.4X Teleconverter",33082:"Sony FE 200-600mm F5.6-6.3 G OSS + 2X Teleconverter",33083:"Sony FE 600mm F4 GM OSS + 1.4X Teleconverter",33084:"Sony FE 600mm F4 GM OSS + 2X Teleconverter",33085:"Sony FE 70-200mm F2.8 GM OSS II + 1.4X Teleconverter",33086:"Sony FE 70-200mm F2.8 GM OSS II + 2X Teleconverter",33087:"Sony FE 70-200mm F4 Macro G OSS II + 1.4X Teleconverter",33088:"Sony FE 70-200mm F4 Macro G OSS II + 2X Teleconverter",33089:"Sony FE 300mm F2.8 GM OSS + 1.4X Teleconverter",33090:"Sony FE 300mm F2.8 GM OSS + 2X Teleconverter",33091:"Sony FE 400-800mm F6.3-8 G OSS + 1.4X Teleconverter",33092:"Sony FE 400-800mm F6.3-8 G OSS + 2X Teleconverter",33093:"Sony FE 100mm F2.8 Macro GM OSS + 1.4X Teleconverter",33094:"Sony FE 100mm F2.8 Macro GM OSS + 2X Teleconverter",33095:"Sony FE 100-400mm F4.5 GM OSS + 1.4X Teleconverter",33096:"Sony FE 100-400mm F4.5 GM OSS + 2X Teleconverter",49201:"Zeiss Touit 12mm F2.8 or other Touit lens",49202:"Zeiss Touit 32mm F1.8",49203:"Zeiss Touit 50mm F2.8 Macro",49216:"Zeiss Batis 25mm F2",49217:"Zeiss Batis 85mm F1.8",49218:"Zeiss Batis 18mm F2.8",49219:"Zeiss Batis 135mm F2.8",49220:"Zeiss Batis 40mm F2 CF",49232:"Zeiss Loxia 50mm F2",49233:"Zeiss Loxia 35mm F2",49234:"Zeiss Loxia 21mm F2.8",49235:"Zeiss Loxia 85mm F2.4",49236:"Zeiss Loxia 25mm F2.4",49456:"Tamron E 18-200mm F3.5-6.3 Di III VC",49457:"Tamron 28-75mm F2.8 Di III RXD",49458:"Tamron 17-28mm F2.8 Di III RXD",49459:"Tamron 35mm F2.8 Di III OSD M1:2",49460:"Tamron 24mm F2.8 Di III OSD M1:2",49461:"Tamron 20mm F2.8 Di III OSD M1:2",49462:"Tamron 70-180mm F2.8 Di III VXD",49463:"Tamron 28-200mm F2.8-5.6 Di III RXD",49464:"Tamron 70-300mm F4.5-6.3 Di III RXD",49465:"Tamron 17-70mm F2.8 Di III-A VC RXD",49466:"Tamron 150-500mm F5-6.7 Di III VC VXD",49467:"Tamron 11-20mm F2.8 Di III-A RXD",49468:"Tamron 18-300mm F3.5-6.3 Di III-A VC VXD",49469:"Tamron 35-150mm F2-F2.8 Di III VXD",49470:"Tamron 28-75mm F2.8 Di III VXD G2",49471:"Tamron 50-400mm F4.5-6.3 Di III VC VXD",49472:"Tamron 20-40mm F2.8 Di III VXD",49473:"Tamron 17-50mm F4 Di III VXD or Tokina or Viltrox lens",49474:"Tamron 70-180mm F2.8 Di III VXD G2 or Viltrox lens",49475:"Tamron 50-300mm F4.5-6.3 Di III VC VXD",49476:"Tamron 28-300mm F4-7.1 Di III VC VXD",49477:"Tamron 90mm F2.8 Di III Macro VXD",49478:"Tamron 16-30mm F2.8 Di III VXD G2",49479:"Tamron 25-200mm F2.8-5.6 Di III VXD G2",49480:"Tamron 35-100mm F2.8 Di III VXD",49712:"Tokina FiRIN 20mm F2 FE AF",49713:"Tokina FiRIN 100mm F2.8 FE MACRO",49714:"Tokina atx-m 11-18mm F2.8 E",50480:"Sigma 30mm F1.4 DC DN | C",50481:"Sigma 50mm F1.4 DG HSM | A",50482:"Sigma 18-300mm F3.5-6.3 DC MACRO OS HSM | C + MC-11",50483:"Sigma 18-35mm F1.8 DC HSM | A + MC-11",50484:"Sigma 24-35mm F2 DG HSM | A + MC-11",50485:"Sigma 24mm F1.4 DG HSM | A + MC-11",50486:"Sigma 150-600mm F5-6.3 DG OS HSM | C + MC-11",50487:"Sigma 20mm F1.4 DG HSM | A + MC-11",50488:"Sigma 35mm F1.4 DG HSM | A",50489:"Sigma 150-600mm F5-6.3 DG OS HSM | S + MC-11",50490:"Sigma 120-300mm F2.8 DG OS HSM | S + MC-11",50492:"Sigma 24-105mm F4 DG OS HSM | A + MC-11",50493:"Sigma 17-70mm F2.8-4 DC MACRO OS HSM | C + MC-11",50495:"Sigma 50-100mm F1.8 DC HSM | A + MC-11",50499:"Sigma 85mm F1.4 DG HSM | A",50501:"Sigma 100-400mm F5-6.3 DG OS HSM | C + MC-11",50503:"Sigma 16mm F1.4 DC DN | C",50507:"Sigma 105mm F1.4 DG HSM | A",50508:"Sigma 56mm F1.4 DC DN | C",50512:"Sigma 70-200mm F2.8 DG OS HSM | S + MC-11",50513:"Sigma 70mm F2.8 DG MACRO | A",50514:"Sigma 45mm F2.8 DG DN | C",50515:"Sigma 35mm F1.2 DG DN | A",50516:"Sigma 14-24mm F2.8 DG DN | A",50517:"Sigma 24-70mm F2.8 DG DN | A",50518:"Sigma 100-400mm F5-6.3 DG DN OS | C",50521:"Sigma 85mm F1.4 DG DN | A",50522:"Sigma 105mm F2.8 DG DN MACRO | A",50523:"Sigma 65mm F2 DG DN | C",50524:"Sigma 35mm F2 DG DN | C",50525:"Sigma 24mm F3.5 DG DN | C",50526:"Sigma 28-70mm F2.8 DG DN | C",50527:"Sigma 150-600mm F5-6.3 DG DN OS | S",50528:"Sigma 35mm F1.4 DG DN | A",50529:"Sigma 90mm F2.8 DG DN | C",50530:"Sigma 24mm F2 DG DN | C",50531:"Sigma 18-50mm F2.8 DC DN | C",50532:"Sigma 20mm F2 DG DN | C",50533:"Sigma 16-28mm F2.8 DG DN | C",50534:"Sigma 20mm F1.4 DG DN | A",50535:"Sigma 24mm F1.4 DG DN | A",50536:"Sigma 60-600mm F4.5-6.3 DG DN OS | S",50537:"Sigma 50mm F2 DG DN | C",50538:"Sigma 17mm F4 DG DN | C",50539:"Sigma 50mm F1.4 DG DN | A",50540:"Sigma 14mm F1.4 DG DN | A",50543:"Sigma 70-200mm F2.8 DG DN OS | S",50544:"Sigma 23mm F1.4 DC DN | C",50545:"Sigma 24-70mm F2.8 DG DN II | A",50546:"Sigma 500mm F5.6 DG DN OS | S",50547:"Sigma 10-18mm F2.8 DC DN | C",50548:"Sigma 15mm F1.4 DG DN DIAGONAL FISHEYE | A",50549:"Sigma 50mm F1.2 DG DN | A",50550:"Sigma 28-105mm F2.8 DG DN | A",50551:"Sigma 28-45mm F1.8 DG DN | A",50552:"Sigma 35mm F1.2 DG II | A",50553:"Sigma 300-600mm F4 DG OS | S",50554:"Sigma 16-300mm F3.5-6.7 DC OS | C",50555:"Sigma 12mm F1.4 DC | C",50556:"Sigma 17-40mm F1.8 DC | A",50557:"Sigma 200mm F2 DG OS | S",50558:"Sigma 20-200mm F3.5-6.3 DG | C",50559:"Sigma 135mm F1.4 DG | A",50563:"Sigma 35mm F1.4 DG II | A",50564:"Sigma 15mm F1.4 DC | C",50992:"Voigtlander SUPER WIDE-HELIAR 15mm F4.5 III",50993:"Voigtlander HELIAR-HYPER WIDE 10mm F5.6",50994:"Voigtlander ULTRA WIDE-HELIAR 12mm F5.6 III",50995:"Voigtlander MACRO APO-LANTHAR 65mm F2 Aspherical",50996:"Voigtlander NOKTON 40mm F1.2 Aspherical",50997:"Voigtlander NOKTON classic 35mm F1.4",50998:"Voigtlander MACRO APO-LANTHAR 110mm F2.5",50999:"Voigtlander COLOR-SKOPAR 21mm F3.5 Aspherical",51000:"Voigtlander NOKTON 50mm F1.2 Aspherical",51001:"Voigtlander NOKTON 21mm F1.4 Aspherical",51002:"Voigtlander APO-LANTHAR 50mm F2 Aspherical",51003:"Voigtlander NOKTON 35mm F1.2 Aspherical SE",51006:"Voigtlander APO-LANTHAR 35mm F2 Aspherical",51007:"Voigtlander NOKTON 50mm F1 Aspherical",51008:"Voigtlander NOKTON 75mm F1.5 Aspherical",51009:"Voigtlander NOKTON 28mm F1.5 Aspherical",51011:"Voigtlander APO-LANTHAR 28mm F2 Aspherical",51072:"ZEISS Otus ML 50mm F1.4",51073:"ZEISS Otus ML 85mm F1.4",51504:"Samyang AF 50mm F1.4",51505:"Samyang AF 14mm F2.8 or Samyang AF 35mm F2.8",51507:"Samyang AF 35mm F1.4",51508:"Samyang AF 45mm F1.8",51510:"Samyang AF 18mm F2.8 or Samyang AF 35mm F1.8",51512:"Samyang AF 75mm F1.8",51513:"Samyang AF 35mm F1.8",51514:"Samyang AF 24mm F1.8",51515:"Samyang AF 12mm F2.0",51516:"Samyang AF 24-70mm F2.8",51517:"Samyang AF 50mm F1.4 II",51518:"Samyang AF 135mm F1.8",61569:"LAOWA FFII 10mm F2.8 C&D Dreamer",61572:"LAOWA FFII 12mm F2.8 C&D Dreamer",61600:"Thypoch AF 24-50mm F2.8 FE",61760:"Viltrox 135mm F1.8 FE LAB",61761:"Viltrox 28mm F4.5 FE",61762:"Viltrox 35mm F1.2 FE LAB",61763:"Viltrox 85mm F1.4 FE Pro",61766:"Viltrox 40mm F2.5 FE Air",61767:"Viltrox 50mm F2.0 FE Air",61768:"Viltrox 25mm F1.7 E Air",61776:"Viltrox 50mm F1.4 FE Pro",61777:"Viltrox 9mm F2.8 E Air",61778:"Viltrox 14mm F4.0 FE Air",61779:"Viltrox 56mm F1.2 E Pro",61780:"Viltrox 85mm F2.0 FE EVO",61781:"Viltrox 55mm F1.8 FE EVO",61783:"Viltrox 15mm F1.7 E Air",61789:"Viltrox 35mm F1.8 II FE EVO"};const LENS_BRANDS={128:"Sony",129:"Sony",192:"Zeiss",193:"Tamron",194:"Tokina",197:"Sigma",199:"Voigtlander",201:"Samyang",241:"Viltrox"};/*LENS_NAMES_END*/
+/* Mise en page du flux (objectif -> boitier) : la longueur du 0x05 et du 0x06 n'est pas une
+ * constante. L'objectif la recalcule a chaque 0x0A d'apres ses masques (7_Docs/E-Mount/samyang.md
+ * § 2.3, protocol.md § 7.5 : 0x05 de 109 octets avant tout 0x0A, 97 et 40 avec le masque de la carte ; un
+ * FE 24-105 donne aussi 97). La page ne refait pas ce calcul : elle lit la mise en page sur les trames. Le
+ * 0x05 et le 0x06 ouvrent leur trame, et seuls des accuses (1D 1F 22 2E 1C 3C, trois au plus)
+ * suivent le 0x06 (samyang.md § 4.4) : la zone utile la plus courte d'une trame qui commence par l'un
+ * d'eux, depuis le dernier 0x0A vu, est sa longueur. Un 0x0A vu (* tx ou * rx) l'oublie. */
+const LAYOUT={};
+function tile(bytes,len,table,dir){
+  const msgs=[]; let i=5; const end=len-3;
+  while(i<end){
+    const t=bytes[i]; const sz=(dir==='L2B'&&(t===0x05||t===0x06))?LAYOUT[t]:table[t];
+    if(!sz||i+sz>end) return null;
+    const m={type:t,name:NAMES[t]||'?',payload:bytes.slice(i+1,i+sz)};
+    decorate(m,dir); msgs.push(m); i+=sz;
+  }
+  return msgs;
+}
+function decorate(m,dir){
+  const t=m.type;
+  if(t===0x40&&m.payload.length===18){ m.svc={main:String.fromCharCode(m.payload[0]),sub:m.payload[1],data:m.payload.slice(2)}; }
+  if(t===0x05&&dir==='L2B'&&m.payload.length>=28){ /* offsets verifies sur AF 135 et FE 24-105 */
+    const p=m.payload; m.fields={aperture:p[0]|(p[1]<<8),focus_unit:p[20]|(p[21]<<8),focus_255:p[23],focal_mm:((p[24]|(p[25]<<8))/10).toFixed(1),focal_nom_mm:((p[26]|(p[27]<<8))/10).toFixed(1),move:m.payload.length>60?((p[60]<<24)>>24):undefined};
+  }
+  if(t===0x07&&dir==='L2B'&&m.payload.length>=11){ const p=m.payload, id=p[9]|(p[10]<<8); m.fields={sig:p[1].toString(16).padStart(2,'0')+p[2].toString(16).padStart(2,'0'),fw:p[5]+'.'+String(p[6]).padStart(2,'0'),lens_id:id,name:LENS_NAMES[id]||(LENS_BRANDS[id>>8]?LENS_BRANDS[id>>8]+' ?':'?')}; }
+  if(t===0x06&&dir==='L2B'&&m.payload.length>=4){ const p=m.payload; m.fields={limits:p[0],position:p[2]|(p[3]<<8)}; }
+  if(t===0x1D&&dir==='B2L'&&m.payload.length>=4){ const p=m.payload; m.fields={value:p[0]|(p[1]<<8),byte3:p[2],unit:p[3]&3,dir:p[3]>>6,flags:'0x'+p[3].toString(16)}; }
+}
+/* Pavage par la table de tailles et la mise en page lue (LAYOUT), sinon toute la zone utile est
+ * UN message (marque untiled), jamais lu au-dela de la zone utile. */
+function decodeFrame(bytes, dir){
+  if(bytes.length<8||bytes[0]!==0xF0) return null;
+  const len=bytes[1]|(bytes[2]<<8);
+  if(len!==bytes.length||bytes[len-1]!==0x55) return {err:'longueur ou fin invalide'};
+  let ck=0; for(let i=1;i<len-3;i++) ck=(ck+bytes[i])&0xFFFF;
+  const got=bytes[len-3]|(bytes[len-2]<<8);
+  const out={len,cls:bytes[3],seq:bytes[4],ckOk:ck===got,msgs:[],table:'samyang'};
+  const t0=bytes[5];
+  if(dir==='L2B'&&(t0===0x05||t0===0x06)&&!(LAYOUT[t0]<=len-8)) LAYOUT[t0]=len-8;
+  let msgs=tile(bytes,len,dir==='B2L'?SIZE_B2L:SIZE_L2B,dir);
+  if(msgs&&msgs.some(m=>m.type===0x0A)) for(const k in LAYOUT) delete LAYOUT[k];
+  if(!msgs){ const t=bytes[5]; const m={type:t,name:NAMES[t]||'?',payload:bytes.slice(6,len-3),untiled:true}; decorate(m,dir); msgs=[m]; out.table='untiled'; }
+  out.msgs=msgs;
+  return out;
+}
+const hex=b=>Array.from(b,x=>x.toString(16).padStart(2,'0').toUpperCase()).join(' ');
+const $=id=>document.getElementById(id);
+const setText=(id,t)=>{ const e=$(id); if(e&&e.textContent!==t) e.textContent=t; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ───────────── Journal ───────────── */
+/* LOG ALL (PROTOCOL.md, « LOG ALL ») : une trame entiere est la reference de son
+ * sens et de son type (son 6e octet) ; « * rx|tx <t> ~<tt>[ s<hh>][ <o>=<hex>]… » en est la difference : le numero de
+ * sequence (sinon celui de la reference plus le pas), les octets changes a partir de l'offset <o> compte apres l'octet de
+ * type ; la longueur et la somme se recalculent. « * lost <n> » oublie les references. La page reconstruit la trame pour
+ * la decoder comme une ligne entiere (la mise en page du 0x0A, les noms) ; le journal enregistre garde les lignes de la
+ * carte telles quelles. */
+const REFS=new Map();
+function frameRef(dir,bytes){ REFS.set(dir+':'+bytes[5],{bytes:bytes.slice(),step:0}); }
+/* Ce que le decodeur a appris d'un flux (references, morceaux, mise en page) : oublie a chaque (de)connexion, aucun cache
+ * d'un flux ne sert au suivant ; et a « * lost », ou la ligne perdue a pu etre un 0x0A. */
+function forgetFrames(){ REFS.clear(); frags.clear(); for(const k in LAYOUT) delete LAYOUT[k]; }
+const DIFF_RE=/^\* (rx|tx) (\d+) ~([0-9A-F]{2})(?: s([0-9A-F]{2}))?((?: \d+=(?:[0-9A-F]{2})+)*)$/;
+/* La trame d'une ligne de difference : ses octets, null sans reference (ou incoherente), undefined pour une autre ligne. */
+function diffFrame(text){
+  if(text.startsWith('* lost ')){ forgetFrames(); return undefined; }
+  const m=DIFF_RE.exec(text); if(!m) return undefined;
+  const r=REFS.get(m[1]+':'+parseInt(m[3],16)); if(!r) return null;
+  const b=r.bytes.slice(), len=b.length;
+  if(m[4]!==undefined){ const s=parseInt(m[4],16); r.step=(s-b[4])&255; b[4]=s; } else b[4]=(b[4]+r.step)&255;
+  for(const run of m[5].trim().split(' ').filter(x=>x)){
+    const [o,h]=run.split('='); for(let k=0;k<h.length/2;k++){ const i=6+(+o)+k; if(i>=len-3){ REFS.delete(m[1]+':'+parseInt(m[3],16)); return null; } b[i]=parseInt(h.substr(2*k,2),16); }
+  }
+  let ck=0; for(let i=1;i<len-3;i++) ck=(ck+b[i])&0xFFFF; b[len-3]=ck&255; b[len-2]=ck>>8;
+  r.bytes=b; return b;
+}
+const log=$('log'); const lines=[]; let lastLine='', lastEl=null, lastRep=0; const frags=new Map();
+function addLine(cls, text){
+  const t=new Date().toLocaleTimeString('fr-FR',{hour12:false})+'.'+String(Date.now()%1000).padStart(3,'0');
+  lines.push(t+' '+text); if(lines.length>20000) lines.splice(0,lines.length-20000);
+  /* Les references de LOG ALL, les morceaux et la mise en page (LAYOUT, decodeFrame) sont suivis que la case « decoder
+   * les trames » soit cochee ou non : decochee puis recochee, une difference n'est jamais reconstruite contre une
+   * reference perimee, ni une trame pavee d'apres une mise en page d'avant un 0x0A. Seul l'affichage en depend. */
+  const show=$('fFrames').checked;
+  const rebuilt=diffFrame(text);   /* avant le regroupement des lignes repetees : le numero avance */
+  if(text===lastLine&&lastEl){ lastRep++; let n=lastEl.querySelector('.n'); if(!n){ n=document.createElement('span'); n.className='n'; lastEl.appendChild(n); } n.textContent='×'+(lastRep+1); return; }
+  lastLine=text; lastRep=0;
+  const d=document.createElement('div'); d.className='l '+cls;
+  let extra='';
+  {
+    const m=rebuilt!==undefined?[text,text.substr(2,2)]:/^\* (rx|tx|b2l) (\d+) (?:\+(\d+)\/(\d+)(?:#(\d+))? )?([0-9A-F]{2}(?: [0-9A-F]{2})*)$/.exec(text);
+    if(rebuilt===null) extra='<div class="dec fld">↳ référence inconnue : trame non reconstruite (LOG ALL la rétablit)</div>';
+    else if(m){
+      let bytes=rebuilt||null; const dir=(m[1]==='rx')?'L2B':'B2L';
+      if(!rebuilt&&!m[3]) bytes=m[6].split(' ').map(x=>parseInt(x,16));
+      else if(!rebuilt){ /* fragment « +off/len#id » : reassemble par (sens, numero de trame) — a defaut d'id
+                par (sens, horodatage, longueur) ; un nouveau debut (+0) remplace
+                un assemblage incomplet, qui est signale perdu ; les trous restent des trous */
+        const key=m[1]+':'+(m[5]!==undefined?'#'+m[5]:m[2]+':'+m[4]), off=+m[3], total=+m[4]; const part=m[6].split(' ').map(x=>parseInt(x,16));
+        let f=frags.get(key);
+        if(f&&off===0&&f.got>0){ extra='<div class="dec fld">↳ trame précédente incomplète ('+f.got+'/'+f.bytes.length+' octets) abandonnée</div>'; frags.delete(key); f=null; }
+        if(!f){ f={bytes:new Array(total).fill(null),got:0}; frags.set(key,f); if(frags.size>32) frags.delete(frags.keys().next().value); }
+        part.forEach((b,k)=>{ if(off+k<total&&f.bytes[off+k]===null){ f.bytes[off+k]=b; f.got++; } });
+        if(f.got===total){ bytes=f.bytes; frags.delete(key); } else extra+='<div class="dec">↳ fragment '+off+'/'+total+' ('+f.got+' octets reçus)</div>';
+      }
+      if(bytes&&!rebuilt&&m[1]!=='b2l'&&bytes.length>5) frameRef(m[1],bytes);
+      const f=bytes?decodeFrame(bytes,dir):null;
+      if(f&&show){
+        if(!f.err) extra='<div class="dec">↳ len='+f.len+' cls='+f.cls+' seq='+f.seq+(f.ckOk?'':' <span class="fld">checksum faux</span>')+(f.table!=='samyang'?' <span class="fld">table '+f.table+'</span>':'')+' · '+f.msgs.map(x=>x.type.toString(16).padStart(2,'0').toUpperCase()+':'+x.name+(x.untiled?' <span class="fld">non pavé</span>':'')+(x.svc?' <span class="fld">\''+x.svc.main+'\' '+x.svc.sub.toString(16).padStart(2,'0').toUpperCase()+' ['+hex(x.svc.data)+']</span>':'')+(x.fields?' <span class="fld">'+Object.entries(x.fields).filter(([k,v])=>v!==undefined).map(([k,v])=>k+'='+v).join(' ')+'</span>':'')).join(' | ')+'</div>';
+        else extra='<div class="dec fld">↳ '+f.err+'</div>'; }
+    }
+  }
+  if(!show) extra='';
+  d.innerHTML='<span class="t">'+t+'</span>'+text.replace(/&/g,'&amp;').replace(/</g,'&lt;')+extra;
+  log.appendChild(d); lastEl=d;
+  while(log.childElementCount>1500) log.removeChild(log.firstChild);
+  log.scrollTop=log.scrollHeight;
+}
+$('btnClear').onclick=()=>{ log.innerHTML=''; lines.length=0; lastLine=''; lastEl=null; };
+/* L'URL du Blob (tout le journal, 20 000 lignes au plus) est liberee une fois le telechargement parti : le clic le
+ * lance, la page n'en garde rien. */
+$('btnExport').onclick=()=>{ const blob=new Blob([lines.join('\n')+'\n'],{type:'text/plain'}); const a=document.createElement('a'), u=URL.createObjectURL(blob); a.href=u; a.download='emount-bench-'+new Date().toISOString().replace(/[:.]/g,'-')+'.txt'; a.click(); setTimeout(()=>URL.revokeObjectURL(u),100); };
+
+/* ───────────── Port serie : une requete en vol, la ligne suivante (hors « * ») est la reponse.
+ * Chaque connexion a une generation : une attente, une file ou une lecture d'une connexion
+ * precedente ne touche jamais la suivante. Apres un timeout, la reponse de la commande
+ * suivante est validee par sa forme ; ce qui n'y ressemble pas est une tardive, journalisee et
+ * ignoree. Les reponses Moonlite (':…#' -> 'XXXX#', ':GV#' -> 2 octets) ont leur propre cadrage. ───────────── */
+let port=null, reader=null, writer=null, queue=[], pumping=false, waiter=null, connGen=0;
+const enc=new TextEncoder(), dec=new TextDecoder();
+const POLL_CMDS=/^([feold]|t)$/;
+/* forme attendue de la reponse a une commande : un « ok », un nombre, y/n... ; null = tout */
+function expectFor(cmd){
+  const c=cmd[0];
+  if(cmd.startsWith(':')) return null;
+  if(/^[A-Z]/.test(cmd)) return /^(ok|er)\b/;
+  if(cmd.length===1){
+    if(c==='f') return /^(\d+|nc|er\b.*)$/;
+    if(c==='e') return /^(y|n|nc|er\b.*)$/;
+    if(c==='r') return /^(\d+-\d+|nc|er\b.*)$/;
+    if(c==='a') return /^([\d.]+-[\d.]+|nc|er\b.*)$/;
+    if(c==='o') return /^([\d.]+|nc|er\b.*)$/;
+    if(c==='t') return /^ext=/;
+    if(c==='v') return /^\d+\.\d+$/;
+    if(c==='p') return /^(\d \d|er\b.*)$/;
+    if(c==='g') return /^(ok|aborted|stall|unconfirmed|-)$/; /* PROTOCOL.md § 2 : repond dans tout etat */
+    if(c==='q') return /^(ok|er\b.*)$/; /* PROTOCOL.md § 2 : ok, er nocap stop, er busy boot, er link … */
+    return null;
+  }
+  return /^(ok|er\b.*|nc)$/;
+}
+let lastRxAt=0, needSync=false; /* lastRxAt : derniere ligne de reponse (hors « * ») ; needSync : apres un timeout, resynchroniser avant la commande suivante */
+const MOON_MUTE=/^:(SN|SP|SD|SH|SF|SC|PO|C|\+|-|FG|FQ)/i; /* commandes Moonlite sans reponse : envoyees sans attente */
+function onLine(line){
+  if(line.startsWith('* ')){ addLine(/^\* (rx|b2l) /.test(line)?'rx':/^\* tx /.test(line)?'tx':'ev',line); return; }
+  lastRxAt=Date.now(); /* une ligne de reponse, pas une ligne de journal « * » : elle seule rompt le silence de resync */
+  if(waiter){
+    if(waiter.expect&&!waiter.expect.test(line)){ addLine('err','(réponse inattendue à « '+waiter.cmd+' », ignorée) '+line); return; }
+    const w=waiter; waiter=null; w.resolve(line); return;
+  }
+  addLine('ev','(non sollicité) '+line);
+}
+/* Une commande sur le fil, sa reponse ou null (timeout, deconnexion). Sans identifiant de requete,
+ * la reponse tardive d'une commande expiree serait prise pour celle de la suivante quand elles ont
+ * la meme forme (deux « ok », deux nombres) : apres un timeout, `needSync` impose une
+ * resynchronisation (resync) avant la commande suivante. */
+function send(cmd, quiet, gen){
+  return new Promise(async res=>{
+    if(!writer||gen!==connGen){ res(null); return; }
+    const show=!(quiet||(POLL_CMDS.test(cmd)&&!$('fPoll').checked));
+    if(show) addLine('cmd','> '+cmd);
+    const moon=cmd.startsWith(':');
+    if(moon&&MOON_MUTE.test(cmd)){ /* muette : rien a attendre, pas de faux timeout */
+      try{ await writer.write(enc.encode(cmd)); res(''); }catch(e){ res(null); } return;
+    }
+    /* l'echeance et l'echec de l'ecriture ne touchent que CETTE attente (w) : l'ecriture peut echouer apres l'echeance,
+       quand l'attente en place est deja celle de la commande suivante */
+    const w={cmd,gen,expect:expectFor(cmd),moonFixed:moon&&/^:GV#$/i.test(cmd)?2:0,moon,
+      resolve:l=>{ clearTimeout(timer); if(show) addLine(l.startsWith('er')?'err':'ok',l); res(l); },
+      cancel:()=>{ clearTimeout(timer); res(null); }};
+    const timer=setTimeout(()=>{ if(waiter===w){ waiter=null; needSync=true; if(show) addLine('err','(pas de réponse en '+(moon?'0,8':'3')+' s)'); res(null); } },moon?800:3000);
+    waiter=w;
+    try{ await writer.write(enc.encode(cmd+(moon?'':'\n'))); }catch(e){ clearTimeout(timer); if(waiter===w) waiter=null; res(null); }
+  });
+}
+/* Resynchronisation : la carte traite les lignes dans l'ordre, donc quand elle a repondu sa version
+ * (« 1.0 ») a un `v` envoye APRES la commande expiree, toute reponse tardive de celle-ci est deja
+ * passee (et a ete ignoree par la forme « x.y » attendue). On exige ensuite 100 ms de silence (PROTOCOL.md § 6) :
+ * sans ligne de reponse ; les lignes de journal « * » ne le rompent pas (sous LOG ON/ALL, jusqu'a
+ * 30 par seconde, il n'arriverait jamais). Pas de plafond : la
+ * commande ne part pas avant ce silence. Trois `v` sans reponse : le canal reste a resynchroniser (needSync). */
+async function resync(gen){
+  for(let i=0;i<3&&gen===connGen;i++){
+    const v=await send('v',true,gen);
+    if(v===null) continue;
+    while(gen===connGen&&Date.now()-lastRxAt<100) await sleep(105-(Date.now()-lastRxAt));
+    needSync=false; return true;
+  }
+  return false;
+}
+/* Les deplacements du focus (PROTOCOL.md § 2 : f<n>, f±n, m<n>, jg ; Moonlite :FG#) : q les retire de la file. */
+const MOVE_CMDS=/^(f[+-]?\d+|m\d+|jg|:FG#)$/i;
+/* File des requetes, une seule en vol. « q » (arret) passe devant toute requete en attente,
+ * scrutation comprise, et retire de la file les deplacements en attente (leur promesse rend null) :
+ * sinon ils partiraient juste apres lui et le moteur repartirait. Il attend la requete en vol (sa reponse ou
+ * son echeance). Apres une echeance, la resynchronisation est une etape de la file, jouee avant la
+ * requete suivante quelle qu'elle soit, q compris : q ne recoit jamais la tardive d'une autre
+ * commande (le « ok » d'un f<n> a sa forme). Sans echeance, q ne paie aucun retard. */
+function ask(cmd, quiet){
+  return new Promise(res=>{
+    const job={cmd,quiet,res};
+    if(cmd==='q'){
+      const moves=queue.filter(j=>MOVE_CMDS.test(j.cmd)); queue=queue.filter(j=>!MOVE_CMDS.test(j.cmd));
+      const k=queue.findIndex(j=>j.cmd!=='q'); queue.splice(k<0?queue.length:k,0,job);
+      moves.forEach(j=>{ addLine('ev','[app] q : « '+j.cmd+' » retiré de la file'); j.res(null); });
+    } else queue.push(job);
+    pump();
+  });
+}
+async function pump(){
+  if(pumping) return;
+  pumping=true; const gen=connGen; /* la file est videe a chaque (de)connexion : ses requetes sont de cette generation */
+  try{
+    while(gen===connGen&&queue.length){
+      /* une commande ne part jamais sur un canal non resynchronise : sans resynchronisation, elle rend null sans
+         partir, et la suivante la retente */
+      if(needSync&&!await resync(gen)){
+        if(gen!==connGen||!queue.length) break;
+        const job=queue.shift(); addLine('err','[app] « '+job.cmd+' » non envoyée : pas de réponse à la resynchronisation (v)'); job.res(null); continue;
+      }
+      if(gen!==connGen||!queue.length) break;
+      const job=queue.shift(); /* relue apres la resync : un q arrive pendant passe devant */
+      job.res(await send(job.cmd,job.quiet,gen));
+    }
+  }finally{ if(gen===connGen) pumping=false; }
+}
+/* (de)connexion : toute requete en attente rend null, une pompe de l'ancienne generation s'arrete seule */
+function flushQueue(){ const q=queue; queue=[]; pumping=false; q.forEach(j=>j.res(null)); }
+async function readLoop(gen){
+  let buf='';
+  const rd=reader;
+  try{
+    while(gen===connGen&&rd){
+      const {value,done}=await rd.read();
+      if(gen!==connGen) return; /* la connexion a change PENDANT la lecture : ces octets sont a l'ancienne, on ne les livre pas */
+      if(done) break;
+      buf+=dec.decode(value,{stream:true});
+      for(;;){
+        const w=waiter;
+        if(buf.startsWith('*')){ /* ligne d'evenement « * … » : toujours terminee par \n, demultiplexee AVANT tout cadrage Moonlite (LOG ON pendant :GV#) */
+          const i=buf.indexOf('\n'); if(i<0) break;
+          const l=buf.slice(0,i).replace(/\r$/,''); buf=buf.slice(i+1); onLine(l); continue;
+        }
+        if(w&&w.moon){ /* Moonlite : 2 octets fixes (GV) ou jusqu'au '#' */
+          if(w.moonFixed){ if(buf.length>=w.moonFixed){ const l=buf.slice(0,w.moonFixed); buf=buf.slice(w.moonFixed); onLine(l); continue; } break; }
+          const k=buf.indexOf('#'); if(k>=0){ const l=buf.slice(0,k+1); buf=buf.slice(k+1); onLine(l); continue; } break;
+        }
+        { /* reponse Moonlite sans attente Moonlite (hex + '#', sans fin de ligne, PROTOCOL.md § 4) : la
+             tardive d'une commande expiree. Cadree a son '#', jamais collee a la ligne qui suit ;
+             c'est une ligne de reponse : elle rompt le silence. */
+          const m=/^[0-9A-Fa-f]+#/.exec(buf);
+          if(m){ buf=buf.slice(m[0].length); lastRxAt=Date.now(); addLine('err','(réponse Moonlite tardive, ignorée) '+m[0]); continue; }
+        }
+        const i=buf.indexOf('\n'); if(i<0) break;
+        const l=buf.slice(0,i).replace(/\r$/,''); buf=buf.slice(i+1);
+        if(l.length) onLine(l);
+      }
+    }
+  }catch(e){ if(gen===connGen&&port) addLine('err','[app] lecture : '+e.message); }
+  if(gen===connGen&&port){ addLine('err','[app] liaison perdue'); await disconnect(); }
+}
+/* Une seule connexion a la fois : le bouton est rendu inactif des le clic, avant requestPort et open (deux clics
+ * ouvraient deux ports) ; connecting tient jusqu'a la fin de connect, reussie ou non. */
+let connecting=false;
+async function connect(){
+  if(connecting||port) return;
+  connecting=true; $('btnConnect').disabled=true;
+  try{
+    port=await navigator.serial.requestPort();
+    await port.open({baudRate:115200});
+    const gen=++connGen;
+    writer=port.writable.getWriter(); reader=port.readable.getReader();
+    /* Deux `v` au plus. L'ouverture du port peut redemarrer la XIAO : un `v` envoye pendant son
+     * demarrage est perdu. Le second passe par la resynchronisation que son echeance impose
+     * (PROTOCOL.md § 6 : jusqu'a 3 `v` de 3 s, puis 100 ms de silence), et ne part pas sans elle : une carte
+     * muette se voit en 4 echeances de `v`, 12 s, et la page se deconnecte.
+     * Une carte qui repond au premier `v` ne paie aucun retard. */
+    flushQueue(); waiter=null; needSync=false;
+    readLoop(gen);
+    setText('connTxt','connexion…'); $('btnConnect').disabled=true; $('btnDisconnect').disabled=false;
+    let v=await ask('v',true);
+    if(v===null&&gen===connGen) v=await ask('v',true);
+    if(gen!==connGen) return;
+    if(v===null){ addLine('err','[app] carte muette : aucune réponse à « v » en 12 s — déconnexion'); await disconnect(); return; }
+    $('connDot').classList.add('on'); setText('connTxt','connecté');
+    /* `v` est la version du firmware de la carte ; la cause de son dernier redemarrage est dans DEBUG
+     * (labo), lue une fois : un redemarrage de la XIAO fait tomber le port. */
+    L.ver=v; addLine('ev','[app] carte : firmware '+v);
+    const dbg=parseKV(await ask('DEBUG',true)); if(gen!==connGen) return; L.reset=dbg.reset||null;
+    await refreshAll(true); if(gen!==connGen) return;
+    startPoll();
+  }catch(e){ addLine('err','[app] '+e.message); await disconnect(); }
+  finally{ connecting=false; }
+}
+async function disconnect(){
+  connGen++;                       /* tout ce qui appartient a l'ancienne connexion est invalide */
+  stopPoll(); busyPoll=false;
+  if(waiter){ const w=waiter; waiter=null; w.cancel(); }
+  flushQueue(); needSync=false; forgetFrames();
+  const p=port, r=reader, wr=writer; port=reader=writer=null;
+  try{ if(r){ await r.cancel().catch(()=>{}); r.releaseLock(); } }catch(e){}
+  try{ if(wr){ wr.releaseLock(); } }catch(e){}
+  try{ if(p) await p.close(); }catch(e){}
+  $('connDot').classList.remove('on'); setText('connTxt','déconnecté'); $('btnConnect').disabled=false; $('btnDisconnect').disabled=true;
+  L.present=L.fault=false; forgetLens(); setText('s_state','—');
+}
+$('btnConnect').onclick=connect; $('btnDisconnect').onclick=disconnect;
+if(!('serial' in navigator)){ $('serialNote').hidden=false; $('btnConnect').disabled=true; }
+$('cli').onsubmit=e=>{ e.preventDefault(); const c=$('cliIn').value.trim(); if(c){ ask(c); $('cliIn').value=''; } };
+
+/* ───────────── Etat objectif (a partir de t, i, j, r, a, o, f, e) ─────────────
+ * `t` ne porte que l'etat de la carte (ext, present, boot_state, busy, power_off, last_op, mf, oss, et ring, que la page
+ * n'affiche qu'avec la ligne `t`) ; l'identite, la marque (`j`) et les bornes se lisent par leur lettre. Le
+ * role de la bague suit le commutateur de l'objectif : la page ne le force pas. n, w, l (er nocap) et d (toujours -)
+ * ne sont pas servis : la page ne les lit pas. */
+/* moveWatch : un deplacement lance par la page (son `ok` recu), dont la fin (e -> n) fait lire `g` ; stopWatchUntil :
+ * apres `aborted` ou `stall`, l'instant jusqu'ou `g` est relu, l'arret non confirme arrivant apres (PROTOCOL.md § 3 :
+ * trois 0x1C, 4,5 s apres le premier). */
+const L={present:false,fault:false,ext:false,ver:null,reset:null,pos:null,min:null,max:null,mark:null,moving:null,fnum:null,fmin:null,fmax:null,busy:'-',lastOp:'',moveWatch:false,stopWatchUntil:0};
+/* Un objectif pret : present et pas en fault (PROTOCOL.md § 7 : en fault, les lettres repondent er fault). */
+const lensReady=()=>L.present&&!L.fault;
+/* La ligne d'etat : FAULT avec sa raison (le jeton de last_op=boot:er:"<jeton>", § 5), sinon occupe ou pret. */
+function stateText(t){
+  if(!L.present) return '· absent ('+(t.boot_state||'?')+')';
+  if(L.fault){ const m=/:er:"([^"]*)"$/.exec(t.last_op||''); return '· FAULT'+(m?' : '+m[1]:''); }
+  return '· '+(L.busy!=='-'?'occupé : '+L.busy:'prêt');
+}
+/* Ce qui n'est plus su (objectif retire ou en fault, deconnexion) s'affiche « — » et ne sert plus a calculer. */
+function forgetLens(){
+  L.pos=L.min=L.max=L.mark=L.fnum=L.fmin=L.fmax=L.moving=null; irisTarget=null; L.moveWatch=false; L.stopWatchUntil=0;
+  focusDragging=irisDragging=false;
+  setText('s_id','—'); setText('s_focus','—'); setText('s_moving',''); setText('s_fnum','f/—');
+  frv.textContent='—'; irv.textContent='f/—'; fsl.classList.remove('pending'); isl.classList.remove('pending');
+  applyPanels(); applyLimits();
+}
+const num=x=>(x===undefined||x===null||x==='-1'||x==='-')?null:parseInt(x,10);
+/* cle=valeur ; une valeur peut contenir des segments entre guillemets, avec des espaces, n'importe
+ * ou (id="Sony 24.0mm …", last_op=boot:er:"lost") ; les guillemets qui entourent
+ * toute la valeur sont retires */
+function parseKV(line){ const o={}; if(!line) return o; for(const m of line.matchAll(/(\w+)=((?:[^\s"]|"[^"]*")*)/g)){ const v=m[2]; o[m[1]]=/^"[^"]*"$/.test(v)?v.slice(1,-1):v; } return o; }
+function isNum(s){ return typeof s==='string'&&/^-?\d+$/.test(s); }
+async function refreshAll(announce){
+  const gen=connGen; /* une continuation de l'ancienne connexion ne touche pas la nouvelle */
+  const t=parseKV(await ask('t',true)); if(gen!==connGen) return;
+  if(t.ext) setText('s_board',boardLine(t));
+  if(t.last_op) L.lastOp=t.last_op;
+  setText('s_t',Object.entries(t).map(([k,v])=>k+'='+v).join(' ')||'—');
+  L.present=t.present==='1'; L.fault=t.boot_state==='fault'; L.busy=t.busy||'-'; L.ext=t.ext==='1';
+  setText('s_power',powerLine(t)); setText('s_caps',L.ext?'lot étendu (ext='+t.ext+')':'Pinefeat seul');
+  setText('s_state',stateText(t));
+  if(!lensReady()){ forgetLens(); return; }
+  const i=await ask('i',true); if(gen!==connGen) return; setText('s_id',i&&!i.startsWith('er')?i:'—');
+  const mk=await ask('j',true); if(gen!==connGen) return; L.mark=isNum(mk)?+mk:null;
+  const r=await ask('r',true); if(gen!==connGen) return; let m=/^(\d+)-(\d+)$/.exec(r||'');
+  if(m){ L.min=+m[1]; L.max=+m[2]; } else { L.min=L.max=null; }
+  const a=await ask('a',true); if(gen!==connGen) return; m=/^([\d.]+)-([\d.]+)$/.exec(a||'');
+  if(m){ L.fmin=+m[1]; L.fmax=+m[2]; } else { L.fmin=L.fmax=null; }
+  applyPanels(); applyLimits();
+  await pollSlow(); if(gen!==connGen) return; await pollFast(); if(gen!==connGen) return;
+  if(announce) addLine('ev','[app] prêt : '+(i&&!i.startsWith('er')?i:'-'));
+}
+/* Meme interface pour tout objectif : tout est actif des qu'un objectif est la. Ce que l'objectif
+ * ne sert pas repond `er nocap …` dans le journal. La page ne porte que ce que la carte sert. */
+function applyPanels(){
+  const on=lensReady(), ap=on&&L.fmin!==null; /* l'ouverture se regle dans la plage lue (a) : sans elle, rien a calculer */
+  document.querySelectorAll('#secFocus button, #secFocus input').forEach(e=>e.disabled=!on);
+  document.querySelectorAll('#secIris button, #secIris input').forEach(e=>e.disabled=!ap);
+  $('secFocus').style.opacity=on?'1':'.55'; $('secIris').style.opacity=ap?'1':'.55';
+  setText('irisBy',on?'· standard (0x03)':'');
+}
+function applyLimits(){
+  const fr=$('focusRange');
+  if(L.min!==null&&L.max!==null){
+    fr.min=L.min; fr.max=L.max; $('focusTarget').min=L.min; $('focusTarget').max=L.max;
+    setText('scMin',L.min.toLocaleString('fr-FR')+' (proche)'); setText('scMax',L.max.toLocaleString('fr-FR')+' (butée)');
+    $('scHome').style.display='none';
+    const mk=$('scMark'), span=L.max-L.min; /* min = max : une seule position, a gauche (pas de division par zero) */
+    if(L.mark!==null&&L.mark>=L.min&&L.mark<=L.max){ mk.style.left=(span>0?(L.mark-L.min)/span*100:0).toFixed(1)+'%'; mk.style.display=''; } else mk.style.display='none';
+    setText('focusHint','Bornes publiées par l\'objectif (r) : '+L.min+' – '+L.max+'.');
+  } else { fr.min=0; fr.max=65535; $('focusTarget').min=0; $('focusTarget').max=65535; setText('scMin','bornes inconnues (0)'); setText('scMax','65535'); $('scHome').style.display='none'; $('scMark').style.display='none'; setText('focusHint','Bornes inconnues : l\'objectif n\'a pas publié de 0x06 lisible (r).'); }
+  if(L.fmin!==null&&L.fmax!==null){
+    const st=stopsFor(L.fmin,L.fmax); if(st.join()!==STOPS.join()){ STOPS=st; ir.max=STOPS.length-1; irisScale(); }
+    setText('s_irange','plage '+L.fmin+'–'+L.fmax);
+  } else setText('s_irange','—');
+}
+
+/* ───────────── Poll : f/e a 5 Hz ; t, r, j, o a 1 Hz ───────────── */
+let pollTimer=null, slowTick=0, busyPoll=false;
+/* Un rappel appartient a la connexion qui l'a lance : apres une (de)connexion, il ne continue pas (pas de pollSlow) et
+ * ne rend pas busyPoll, qui est a la nouvelle. */
+function startPoll(){ stopPoll(); const gen=connGen; pollTimer=setInterval(async()=>{ if(busyPoll||!writer||gen!==connGen) return; busyPoll=true; try{ await pollFast(); if(gen===connGen&&++slowTick%5===0) await pollSlow(); }finally{ if(gen===connGen) busyPoll=false; } },200); }
+function stopPoll(){ if(pollTimer){ clearInterval(pollTimer); pollTimer=null; } }
+/* La version vient de `v`, la cause du redemarrage de DEBUG (lus a la connexion), l'etat de `t`. */
+function boardLine(t){ return 'fw '+(L.ver||'?')+(L.reset?' · reset '+L.reset:'')+' · boot '+t.boot_state+(t.last_op&&t.last_op!=='-:ok'?' · dernière op. '+t.last_op:''); }
+function powerLine(t){ return t.power_off==='1'?'alims coupées (p0) : p1 ou b pour rétablir':''; }
+async function pollFast(){
+  if(!lensReady()) return;
+  const gen=connGen;
+  const f=await ask('f',true); if(gen!==connGen) return;
+  if(isNum(f)){ L.pos=+f; setText('s_focus',f); focusSliderSet(+f); }
+  else if(f==='nc'){ L.present=false; addLine('err','[app] objectif disparu'); await refreshAll(); return; }
+  const e=await ask('e',true); if(gen!==connGen) return; L.moving=(e==='y')?true:(e==='n'?false:null); setText('s_moving',L.moving===true?'· en mouvement':(L.moving===null?'· mouvement ? ('+(e===null?'pas de réponse':e)+')':''));
+  if(e==='n'&&L.moveWatch){ L.moveWatch=false; await moveEnd(gen); }
+}
+/* La fin d'un deplacement lance par la page : `g` (PROTOCOL.md § 2), pas DEBUG (decision de l'humain : DEBUG n'est pas
+ * une interface de production). Toute autre reponse qu'`ok` est signalee, au journal et dans le panneau Focus :
+ * `aborted` comme un arret demande (un evenement : une annulation n'est pas un echec, PROTOCOL.md § 2, ligne q), le reste
+ * (stall, unconfirmed, -, pas de reponse) comme une erreur. */
+async function moveEnd(gen){
+  const g=await ask('g',true); if(gen!==connGen) return;
+  L.stopWatchUntil=(g==='aborted'||g==='stall')?Date.now()+6000:0;
+  if(g==='ok'){ setText('s_move',''); return; }
+  moveReport(g);
+}
+function moveReport(g){ const stop=g==='aborted', w=g===null?'pas de réponse à g':stop?'arrêté':g; addLine(stop?'ev':'err','[app] fin du déplacement : '+w); setText('s_move','dernier déplacement : '+w); $('s_move').style.color=stop?'':'var(--bad)'; }
+async function pollSlow(){
+  const gen=connGen;
+  const t=parseKV(await ask('t',true)); if(gen!==connGen) return;
+  const wasPresent=L.present, wasBusy=L.busy, hadLimits=L.min!==null;
+  L.busy=t.busy||'-';
+  if(t.last_op&&t.last_op!==L.lastOp){ L.lastOp=t.last_op; if(t.last_op!=='-:ok'&&!t.last_op.endsWith(':ok')) addLine('err','[app] dernière opération : '+t.last_op); else if(t.last_op!=='-:ok') addLine('ev','[app] dernière opération : '+t.last_op); }
+  if((t.present==='1')!==wasPresent||(t.boot_state==='fault')!==L.fault){ await refreshAll(true); return; }
+  setText('s_power',powerLine(t)); setText('s_state',stateText(t));
+  if(t.ext) setText('s_board',boardLine(t));
+  if(!lensReady()) return;
+  if(wasBusy!=='-'&&L.busy==='-'){ await refreshAll(false); return; } /* fin d'un demarrage (busy=boot) : identite, bornes, plage fraiches */
+  { /* bornes, marque : par leur lettre (`r`, `j`), pas dans `t` */
+    const r=await ask('r',true); if(gen!==connGen) return; const rm=/^(\d+)-(\d+)$/.exec(r||''), tmin=rm?+rm[1]:null, tmax=rm?+rm[2]:null;
+    const mk=await ask('j',true); if(gen!==connGen) return; const tmark=isNum(mk)?+mk:null; if(tmark!==L.mark){ L.mark=tmark; applyLimits(); }
+    if(tmin!==L.min||tmax!==L.max){ L.min=tmin; L.max=tmax; applyPanels(); applyLimits();
+      if(tmin===null&&hadLimits) addLine('ev','[app] bornes inconnues ('+(r||'pas de réponse')+')'); } }
+  const o=await ask('o',true); if(gen!==connGen) return; L.fnum=o&&/^[\d.]+$/.test(o)?+o:null; irisRefresh();
+  if(L.stopWatchUntil&&Date.now()<L.stopWatchUntil){ /* un arret pas encore confirme : g peut passer a unconfirmed */
+    const g=await ask('g',true); if(gen!==connGen) return;
+    if(g==='unconfirmed'){ L.stopWatchUntil=0; moveReport(g); }
+  } else L.stopWatchUntil=0;
+  setText('s_t',Object.entries(t).map(([k,v])=>k+'='+v).join(' '));
+}
+
+/* ───────────── Focus ───────────── */
+const fr=$('focusRange'), frv=$('focusRangeVal'), fsl=$('focusSlider');
+/* Un glissement va de pointerdown au relachement. Valeur changee : `change` lance le deplacement et le termine. Relache
+ * sans changer de valeur (pas de `change`), ou annule (pointercancel) : il se termine la, et le curseur reprend la
+ * position (focus) ou l'ouverture rapportee. Ecoute sur le document : le relachement peut tomber hors du curseur. */
+let focusDragging=false, focusDown=null;
+function focusSliderSet(v){ if(focusDragging||isNaN(v)||fr.disabled) return; fr.value=Math.max(+fr.min,Math.min(+fr.max,v)); frv.textContent=v+' pas'; fsl.classList.remove('pending'); }
+fr.addEventListener('pointerdown',()=>{ focusDragging=true; focusDown=fr.value; });
+fr.addEventListener('input',()=>{ focusDragging=true; frv.textContent='→ '+fr.value; fsl.classList.add('pending'); $('focusTarget').value=fr.value; });
+fr.addEventListener('change',async()=>{ focusDragging=false; await focusGoto(parseInt(fr.value,10)); });
+/* Un deplacement de la page : accepte (`ok`), sa fin est suivie (moveWatch) ; un nouveau deplacement efface le
+ * resultat du precedent et arrete la surveillance de son arret (la carte l'arrete aussi, PROTOCOL.md § 3). */
+async function move(cmd){ const r=await ask(cmd); if(r==='ok'){ L.moveWatch=true; L.stopWatchUntil=0; setText('s_move',''); } return r; }
+async function focusGoto(t){ if(isNaN(t)) return; const r=await move('f'+t); if(r!=='ok'){ addLine('err','[app] déplacement refusé : '+r); fsl.classList.remove('pending'); } }
+$('btnFgoto').onclick=()=>focusGoto(parseInt($('focusTarget').value,10));
+$('btnFm100').onclick=()=>move('f-100'); $('btnFm10').onclick=()=>move('f-10'); $('btnFp10').onclick=()=>move('f+10'); $('btnFp100').onclick=()=>move('f+100');
+$('btnStop').onclick=()=>ask('q');
+$('btnMarkSet').onclick=()=>ask('js'); $('btnMarkGo').onclick=()=>move('jg');
+$('btnReboot').onclick=()=>ask('b'); $('btnPowerOff').onclick=()=>ask('p0'); $('btnPowerOn').onclick=()=>ask('p1');
+
+/* ───────────── Ouverture : tiers de diaphragme ───────────── */
+/* les crans usuels : ceux de la table `thirds` de host.c (f/ x10), f/45 compris */
+const FSTOPS=[1,1.1,1.2,1.4,1.6,1.8,2,2.2,2.5,2.8,3.2,3.5,4,4.5,5,5.6,6.3,7.1,8,9,10,11,13,14,16,18,20,22,25,29,32,36,40,45];
+let STOPS=FSTOPS.slice(5);
+/* les crans entre les bornes lues (a), les bornes comprises meme hors cran : le curseur atteint l'une et l'autre */
+function stopsFor(fmin,fmax){ const r=FSTOPS.filter(f=>f>=fmin-0.05&&f<=fmax+0.05); if(!r.length||Math.abs(r[0]-fmin)>0.05) r.unshift(fmin); if(Math.abs(r[r.length-1]-fmax)>0.05) r.push(fmax); return r; }
+function stopIdx(f){ let b=0,d=1e9; STOPS.forEach((x,i)=>{ const e=Math.abs(x-f); if(e<d){d=e;b=i;} }); return b; }
+const ir=$('irisRange'), irv=$('irisRangeVal'), isl=$('irisSlider');
+let irisDragging=false, irisDown=null, irisTarget=null;
+function irisScale(){ const s=isl.querySelector('.stops'), n=STOPS.length-1; s.innerHTML=''; STOPS.forEach((f,i)=>{ if(i%3===0||i===n){ const e=document.createElement('span'); e.style.left=(n>0?i/n*100:0)+'%'; e.textContent=f; s.appendChild(e); } }); }
+irisScale(); ir.max=STOPS.length-1;
+function irisRefresh(){
+  const reached=irisTarget!==null&&L.fnum!==null&&Math.abs(L.fnum-irisTarget)<=0.05;
+  setText('s_fnum',(L.fnum!==null?'f/'+L.fnum:'f/—')+(irisTarget!==null&&!reached?' → f/'+irisTarget:''));
+  if(reached){ isl.classList.remove('pending'); irisTarget=null; }
+  if(!irisDragging&&L.fnum!==null&&irisTarget===null) ir.value=stopIdx(L.fnum);
+  if(!irisDragging) irv.textContent=L.fnum===null&&irisTarget===null?'f/—':'f/'+STOPS[+ir.value];
+}
+ir.addEventListener('pointerdown',()=>{ irisDragging=true; irisDown=ir.value; });
+function dragEnd(cancel){
+  if(focusDragging&&(cancel||fr.value===focusDown)){ focusDragging=false; fsl.classList.remove('pending'); if(L.pos!==null) focusSliderSet(L.pos); else frv.textContent='—'; }
+  if(irisDragging&&(cancel||ir.value===irisDown)){ irisDragging=false; if(irisTarget===null) isl.classList.remove('pending'); irisRefresh(); }
+}
+document.addEventListener('pointerup',()=>dragEnd(false)); document.addEventListener('pointercancel',()=>dragEnd(true));
+ir.addEventListener('input',()=>{ irisDragging=true; irv.textContent='→ f/'+STOPS[+ir.value]; isl.classList.add('pending'); });
+ir.addEventListener('change',async()=>{ irisDragging=false; await irisGoto(STOPS[+ir.value]); });
+async function irisGoto(f){ if(L.fmin===null){ addLine('err','[app] plage d\'ouverture inconnue (a) : rien envoyé'); return; } irisTarget=f; isl.classList.add('pending'); const r=await ask('a'+f); if(r!=='ok'){ addLine('err','[app] ouverture refusée : '+r); irisTarget=null; isl.classList.remove('pending'); } }
+$('btnIopen').onclick=()=>irisGoto(STOPS[0]);
+/* ±⅓ depuis l'ouverture rapportee (o) : inconnue, rien a calculer */
+function irisStep(d){ if(L.fnum===null){ addLine('err','[app] ouverture inconnue (o) : ±⅓ impossible'); return; } return irisGoto(STOPS[Math.max(0,Math.min(STOPS.length-1,stopIdx(L.fnum)+d))]); }
+$('btnIm').onclick=()=>irisStep(-1);
+$('btnIp').onclick=()=>irisStep(1);
+
+/* ───────────── Journal de la carte ───────────── */
+$('btnLogOn').onclick=()=>ask('LOG ON'); $('btnLogAll').onclick=()=>ask('LOG ALL'); $('btnLogOff').onclick=()=>ask('LOG OFF');
+</script>
+</body>
+</html>

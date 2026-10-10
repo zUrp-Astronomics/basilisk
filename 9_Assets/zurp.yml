@@ -1,0 +1,30 @@
+# SOURCE: zurp-astronomics-site — fiche vitrine de Basilisk, lue par le site zurp-astronomics.github.io
+# AUTHOR: architect
+# DATE: 2026-10-06
+# STATUS: draft
+
+name: Basilisk
+tagline: >-
+  Sleek but deadly Sony E adapter for astro cameras, bending glass to your will without leaving the
+  warm room.
+slogan: Bend the glass to your will
+category: Adapter
+section: gadgets
+status: wip
+basedOn: Pinefeat
+
+description:
+  - >-
+    Basilisk is a Sony E adapter for astro cameras: put a Sony E lens on your astro camera and drive
+    it remotely. The glass bends to your will, and you never leave the warm room.
+  - >-
+    Based on the Pinefeat project, with the zUrp treatment. Open hardware like the rest of the
+    catalog.
+
+poster: basilisk.webp
+posterAlt: >-
+  Basilisk poster on a worn, chipped cream plate: a mechanical serpent with segmented steel coils
+  and green crystal spines, a glowing green eye and a forked tongue, rears with fangs bared in front
+  of the full moon, green rays and blueprint sketches of its head, above the slogan “Bend the glass
+  to your will”.
+accent: '#05b40e'

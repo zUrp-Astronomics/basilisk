@@ -1,0 +1,87 @@
+05:47:06.646 [app] carte : protocole 1.3
+05:47:06.676 [app] prêt : SAMYANG AF 135mm F1.8 — focus par « - »
+05:47:07.939 > LOG ON
+05:47:07.943 ok log=1 all=0
+05:47:09.168 > b
+05:47:09.171 ok
+05:47:09.189 * session 7605 powering
+05:47:09.190 * motion 7605 idle
+05:47:09.689 [app] bornes inconnues à cette focale (?) : Calibrer pour les mesurer
+05:47:09.789 * std 8220 step=handshake result=LENS_CS_never_high
+05:47:09.790 * session 8220 identifying
+05:47:09.790 * tx 8221 F0 29 00 02 B6 01 FF FF FF FF FF FF FF 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 DC 07 55
+05:47:09.813 * rx 8222 F0 29 00 02 00 01 FF 9F 38 5D A2 60 18 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 D7 03 55
+05:47:09.815 * tx 8224 F0 0A 00 02 B7 07 00 CA 00 55
+05:47:09.816 * rx 8225 F0 2B 00 02 00 07 01 03 70 01 00 01 05 00 00 08 00 00 00 00 00 60 92 86 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 8D 02 55
+05:47:09.817 * tx 8226 F0 0A 00 02 B8 3F 00 03 01 55
+05:47:09.818 * rx 8227 +0/74#6 F0 4A 00 02 00 3F 00 53 41 4D 59 41 4E 47 20 41 46 20 31 33 35 6D 6D 20 46 31 2E 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+05:47:09.818 * rx 8227 +64/74#6 00 00 00 00 00 00 00 D2 05 55
+05:47:09.819 * std 8228 step=08 body_flags=02 samyang=yes
+05:47:09.819 * tx 8228 F0 11 00 02 B9 08 02 00 00 00 00 00 00 00 D6 00 55
+05:47:09.820 * rx 8232 +0/210#8 F0 D2 00 02 00 08 BF 11 00 19 04 00 00 80 00 13 01 00 12 E1 01 03 01 35 00 00 18 00 00 00 19 00 00 00 00 00 00 16 00 00 00 00 00 00 00 00 E0 43 00 E0 FF 84 A4 00 00 08 32 25 40 2F 00 00 00 00
+05:47:09.820 * rx 8232 +64/210#8 00 00 00 43 25 04 32 00 00 00 00 00 00 00 F3 F3 07 FB FB 00 00 00 04 04 20 46 00 80 01 00 00 00 00 00 00 00 00 01 01 01 09 09 00 00 00 00 00 E6 80 DD 52 00 D0 DD DF F0 00 08 A0 DD E0 00 52 00
+05:47:09.821 * rx 8232 +128/210#8 10 10 00 00 00 00 00 00 00 00 00 84 64 27 00 06 10 FF 33 00 00 00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00 0C 0C 00 00 00 00 00 00 00 05 00 01 00 05 08 00 00 07 07 FF 00 00 00 00 00 00 00
+05:47:09.822 * rx 8232 +192/210#8 00 00 00 00 00 00 00 00 00 13 00 03 01 07 01 E7 1A 55
+05:47:09.822 * tx 8234 F0 0B 00 02 BA 0B 60 00 32 01 55
+05:47:09.823 * rx 8234 F0 0B 00 02 00 0B 60 00 78 00 55
+05:47:09.824 * tx 8235 F0 0D 00 02 BB 09 00 00 00 00 D3 00 55
+05:47:09.824 * rx 8235 F0 14 00 02 00 09 00 00 00 00 00 00 00 00 00 00 00 1F 00 55
+05:47:09.826 * tx 8236 F0 0A 00 02 BC 0D 00 D5 00 55
+05:47:09.828 * rx 8236 F0 0A 00 02 00 0D 01 1A 00 55
+05:47:09.830 * tx 8237 F0 0A 00 02 BD 10 1F F8 00 55
+05:47:09.849 * lens 8263 0x05[62]=03
+05:47:09.850 * lens 8264 0x05[64]=00
+05:47:09.852 * lens 8264 0x05[66]=00
+05:47:09.853 * ring 8264 mode=focus source=0x05
+05:47:10.850 * rx 9277 F0 0A 00 02 00 10 00 1C 00 55
+05:47:10.853 * tx 9278 F0 19 00 02 0D 0A FF 7F 00 00 00 00 00 00 3F 00 00 00 00 00 00 00 EF 01 55
+05:47:10.855 * rx 9282 F0 19 00 02 00 0A FF 7F 00 00 00 00 00 00 3F 00 00 00 00 00 00 00 E2 01 55
+05:47:10.857 * session 9282 restoring
+05:47:10.858 * restore 9283 mark=24384 dir=inc x=200 path=direct
+05:47:10.863 * motion 9283 commanded
+05:47:10.870 * tx 9293 F0 1B 00 01 0E 04 00 00 19 81 00 00 3D 00 00 00 01 00 00 1D 40 5F 00 00 C2 01 55
+05:47:10.889 * motion 9314 moving
+05:47:11.429 * rx 9847 F0 32 00 01 2F 06 02 00 3D 5F 00 10 10 31 36 12 78 00 00 00 00 19 00 00 00 00 3D 5F 00 05 18 00 00 00 00 00 00 00 00 FF 00 00 00 00 00 1D 00 05 04 55
+05:47:11.431 * motion 9848 settling
+05:47:11.749 * motion 10164 arrived
+05:47:11.751 * session 10164 ready
+05:47:11.752 * restore 10164 end=arrived
+05:47:21.689 * lens 20113 0x05[62]=01
+05:47:21.693 * ring 20114 mode=aperture source=0x05
+05:47:23.989 * ring 22413 gesture pulses=-1 thirds=0
+05:47:24.730 * ring 23146 gesture pulses=-3 thirds=1
+05:47:27.409 * ring 25829 gesture pulses=1 thirds=0
+05:47:37.048 * ring 35463 gesture pulses=1 thirds=0
+05:47:38.891 * ring 37313 gesture pulses=1 thirds=0
+05:47:44.568 * ring 42996 gesture pulses=3 thirds=1
+05:47:47.449 * ring 45880 gesture pulses=1 thirds=0
+05:47:49.468 * ring 47896 gesture pulses=1 thirds=0
+05:47:51.909 * ring 50331 gesture pulses=2 thirds=1
+05:47:54.748 * ring 53163 gesture pulses=4 thirds=2
+05:47:56.989 * ring 55413 gesture pulses=2 thirds=1
+05:47:58.749 * ring 57180 gesture pulses=1 thirds=0
+05:47:59.348 * ring 57780 gesture pulses=1 thirds=0
+05:48:00.908 * ring 59330 gesture pulses=1 thirds=0
+05:48:01.588 * ring 60013 gesture pulses=1 thirds=0
+05:48:02.208 * ring 60630 gesture pulses=1 thirds=0
+05:48:05.068 * ring 63496 gesture pulses=3 thirds=1
+05:48:07.788 * ring 66213 gesture pulses=1 thirds=0
+05:48:08.248 * ring 66680 gesture pulses=1 thirds=0
+05:48:09.368 * ring 67796 gesture pulses=1 thirds=0
+05:48:11.028 * ring 69446 gesture pulses=1 thirds=0
+05:48:11.488 * ring 69913 gesture pulses=1 thirds=0
+05:48:16.748 * ring 75180 gesture pulses=2 thirds=1
+05:48:17.248 * ring 75680 gesture pulses=1 thirds=0
+05:48:19.548 * ring 77980 gesture pulses=3 thirds=1
+05:48:20.888 * ring 79313 gesture pulses=2 thirds=1
+05:48:22.148 * ring 80580 gesture pulses=2 thirds=1
+05:48:23.348 * ring 81780 gesture pulses=1 thirds=0
+05:48:24.948 * ring 83363 gesture pulses=2 thirds=1
+05:48:27.268 * ring 85697 gesture pulses=2 thirds=1
+05:48:28.368 * ring 86797 gesture pulses=2 thirds=1
+05:48:35.928 * ring 94347 gesture pulses=2 thirds=1
+05:48:38.348 * ring 96763 gesture pulses=2 thirds=1
+05:48:43.488 * ring 101913 gesture pulses=-2 thirds=1
+05:48:47.348 * ring 105780 gesture pulses=-1 thirds=0
+05:48:50.287 * ring 108713 gesture pulses=-1 thirds=0
+05:49:00.188 * ring 118614 gesture pulses=-2 thirds=1

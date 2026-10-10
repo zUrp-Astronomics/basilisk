@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<driversList>
+   <devGroup group="Focusers">
+      <device label="Basilisk E-mount Lens" manufacturer="zUrp Astronomics">
+         <driver name="Basilisk E-mount Lens">indi_basilisk_focus</driver>
+         <version>1.0</version>
+      </device>
+   </devGroup>
+</driversList>

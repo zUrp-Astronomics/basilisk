@@ -1,0 +1,425 @@
+17:54:00.873 [app] carte : protocole 1.3
+17:54:00.916 [app] prêt : Samyang AF 135.0mm f/1.8-22 fw1.05 — focus par « samyang »
+17:54:01.793 > LOG ON
+17:54:01.796 ok log=1 all=0
+17:54:04.030 * lens std_move=-1
+17:54:04.031 * lens pos=14615
+17:54:04.163 * lens pos=14581
+17:54:04.280 * lens pos=14505
+17:54:04.397 * lens pos=14499
+17:54:04.533 * lens pos=14467
+17:54:04.630 * lens std_move=0
+17:54:04.631 * lens pos=14464
+17:54:04.831 * lens std_move=1
+17:54:04.832 * lens pos=14472
+17:54:04.981 * lens pos=14502
+17:54:05.097 * lens pos=14544
+17:54:05.230 * lens pos=14550
+17:54:05.331 * lens std_move=0
+17:54:05.333 * lens pos=14555
+17:54:06.838 * rx 11864 F0 1B 00 02 00 40 57 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B5 00 55
+17:54:06.839 * lens sw=1 bouton
+17:54:06.845 * lens astro=0 source=W01+btn08
+17:54:06.845 * lens btn=08
+17:54:07.047 * lens btn=00
+17:54:07.095 * tx 12121 F0 1B 00 02 C1 40 46 FB F3 44 00 00 00 00 00 00 00 00 00 00 00 00 00 00 96 03 55
+17:54:07.096 * btn court=aller_a_la_marque result=ok
+17:54:07.132 * lens pos=14739
+17:54:07.164 * rx 12190 F0 1B 00 02 00 40 4C FB 35 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 13 02 55
+17:54:07.165 * svc main=L pi_edge=high pos=14901 data=35 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:54:07.248 * lens pos=16083
+17:54:07.364 * lens pos=17428
+17:54:07.398 * rx 12424 F0 1B 00 02 00 40 46 FB 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9E 01 55
+17:54:07.400 * svc main=F sub=FB ack=1 data=00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:54:07.480 * lens pos=17651
+17:54:10.397 * rx 15423 F0 1B 00 02 00 40 57 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B6 00 55
+17:54:10.398 * lens sw=2 custom_haut
+17:54:10.398 * lens switch=haut=M1=ouverture
+17:54:10.399 * rx 15423 F0 1B 00 02 00 40 57 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B6 00 55
+17:54:10.399 * lens sw=2 custom_haut
+17:54:10.400 * lens switch=haut=M1=ouverture
+17:54:10.400 * rx 15423 F0 1B 00 02 00 40 57 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B7 00 55
+17:54:10.401 * lens sw=3 custom_bas
+17:54:10.401 * lens switch=bas=M2=focus
+17:54:10.401 * rx 15423 F0 1B 00 02 00 40 57 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B6 00 55
+17:54:10.402 * lens sw=2 custom_haut
+17:54:10.403 * lens switch=haut=M1=ouverture
+17:54:10.403 * ring mode=aperture source=W 0x05[62]=01
+17:54:11.647 * lens std_move=1
+17:54:11.763 * lens std_move=0
+17:54:11.900 * ring ap fnum_x10=20 source=board
+17:54:11.901 * lens std_move=1
+17:54:12.031 * lens fnum_x10=20 std_move=0
+17:54:12.330 * ring gesture pulses=2 (seuil 2 par tiers de diaph.)
+17:54:13.130 * lens std_move=1
+17:54:13.200 * ring ap fnum_x10=22 source=board
+17:54:13.232 * lens fnum_x10=22 std_move=0
+17:54:13.630 * ring gesture pulses=2 (seuil 2 par tiers de diaph.)
+17:54:14.397 * lens std_move=1
+17:54:14.530 * lens std_move=0
+17:54:14.599 * ring ap fnum_x10=25 source=board
+17:54:14.631 * lens fnum_x10=25
+17:54:14.997 * ring gesture pulses=2 (seuil 2 par tiers de diaph.)
+17:54:16.163 * lens std_move=1
+17:54:16.297 * lens std_move=0
+17:54:16.580 * ring gesture pulses=1 (seuil 2 par tiers de diaph.)
+17:54:17.897 * lens std_move=-1
+17:54:18.030 * lens std_move=0
+17:54:18.313 * ring gesture pulses=-1 (seuil 2 par tiers de diaph.)
+17:54:19.214 * lens std_move=-1
+17:54:19.316 * ring ap fnum_x10=22 source=board
+17:54:19.431 * lens fnum_x10=22 std_move=0
+17:54:19.914 * ring gesture pulses=-3 (seuil 2 par tiers de diaph.)
+17:54:20.296 * lens std_move=-1
+17:54:20.396 * lens std_move=0
+17:54:20.666 * ring ap fnum_x10=20 source=board
+17:54:20.669 * lens std_move=-1
+17:54:20.780 * lens fnum_x10=20 std_move=0
+17:54:21.080 * ring gesture pulses=-2 (seuil 2 par tiers de diaph.)
+17:54:22.364 * lens std_move=-1
+17:54:22.466 * ring ap fnum_x10=18 source=board
+17:54:22.581 * lens fnum_x10=18 std_move=0
+17:54:22.880 * ring gesture pulses=-2 (seuil 2 par tiers de diaph.)
+17:54:26.464 * rx 31490 F0 1B 00 02 00 40 57 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B5 00 55
+17:54:26.467 * lens sw=1 bouton
+17:54:26.469 * lens btn=08
+17:54:29.114 * lens btn=00
+17:54:29.195 * mark focal=135 pos=17651
+17:54:29.197 * btn long=marque result=ok
+17:54:29.864 * lens std_move=1
+17:54:29.980 * lens std_move=0
+17:54:30.066 * ring ap fnum_x10=20 source=board
+17:54:30.097 * lens fnum_x10=20
+17:54:30.416 * ring ap fnum_x10=22 source=board
+17:54:30.418 * lens std_move=1
+17:54:30.484 * ring ap fnum_x10=25 source=board
+17:54:30.532 * lens fnum_x10=25 std_move=0
+17:54:30.897 * ring gesture pulses=6 (seuil 2 par tiers de diaph.)
+17:54:36.855 * rx 41881 F0 1B 00 02 00 40 57 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B7 00 55
+17:54:36.857 * lens sw=3 custom_bas
+17:54:36.858 * lens switch=bas=M2=focus
+17:54:36.862 * ring mode=focus source=W 0x05[62]=03
+17:54:37.930 * lens std_move=1
+17:54:37.997 * lens pos=17652
+17:54:38.097 * lens pos=18037
+17:54:38.229 * lens pos=18631
+17:54:38.380 * lens pos=19435
+17:54:38.480 * lens pos=20456
+17:54:38.580 * lens pos=20884
+17:54:38.696 * lens pos=21213
+17:54:38.797 * lens pos=21251
+17:54:38.934 * lens std_move=0
+17:54:38.937 * lens pos=21264
+17:54:40.663 * rx 45689 F0 1B 00 02 00 40 57 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B5 00 55
+17:54:40.665 * lens sw=1 bouton
+17:54:40.730 * lens btn=08
+17:54:45.948 > b
+17:54:45.955 ok
+17:54:45.959 * boot lens=0 why=b
+17:54:45.961 * lens present=0
+17:54:46.128 [app] objectif disparu
+17:54:46.553 * boot step=power logic=1 motor=1
+17:54:47.069 * std step=handshake result=LENS_CS_never_high hint=on_tente_le_0x01_quand_meme
+17:54:47.071 * tx 52097 F0 29 00 02 7E 01 FF FF FF FF FF FF FF 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 A4 07 55
+17:54:47.430 * lens btn=00
+17:54:47.432 * tx 52457 F0 0A 00 02 82 07 00 95 00 55
+17:54:47.434 * lens fnum_x10=18
+17:54:47.438 * rx 52463 F0 2B 00 02 00 07 01 03 70 01 00 01 05 00 00 08 00 00 00 00 00 60 92 86 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 8D 02 55
+17:54:47.441 * tx 52465 F0 11 00 02 84 08 02 00 00 00 00 00 00 00 A1 00 55
+17:54:47.448 * rx 52474 +0/210#3732 F0 D2 00 02 00 08 BF 11 00 19 04 00 00 80 00 13 01 00 12 E1 01 03 01 35 00 00 18 00 00 00 19 00 00 00 00 00 00 16 00 00 00 00 00 00 00 00 E0 43 00 E0 FF 84 A4 00 00 08 32 25 40 2F 00 00 00 00
+17:54:47.452 * rx 52474 +64/210#3732 00 00 00 43 25 04 32 00 00 00 00 00 00 00 F3 F3 07 FB FB 00 00 00 04 04 20 46 00 80 01 00 00 00 00 00 00 00 00 01 01 01 09 09 00 00 00 00 00 E6 80 DD 52 00 D0 DD DF F0 00 08 A0 DD E0 00 52 00
+17:54:47.455 * rx 52474 +128/210#3732 10 10 00 00 00 00 00 00 00 00 00 84 64 27 00 06 10 FF 33 00 00 00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00 0C 0C 00 00 00 00 00 00 00 05 00 01 00 05 08 00 00 07 07 FF 00 00 00 00 00 00 00
+17:54:47.458 * rx 52474 +192/210#3732 00 00 00 00 00 00 00 00 00 13 00 03 01 07 01 E7 1A 55
+17:54:47.461 * std step=08 body_flags=02 reply=ok
+17:54:47.465 * boot step=01 result=muet_mais_parle rx05=1 hint=objectif_deja_initialise
+17:54:47.467 * tx 52476 F0 1B 00 02 85 40 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 38 01 55
+17:54:47.510 * rx 52537 F0 1B 00 02 00 40 56 00 01 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B9 00 55
+17:54:47.516 * svc main=V version=1.05 data=01 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:54:47.518 * boot module=samyang caps=identity,focus_pos,focus_goto,focus_home,focus_limits,moving,distance,calibrate
+17:54:47.519 * boot module=standard caps=identity,focus_pos,focus_goto,focus_home,focus_limits,moving,stop,aperture,focal,calibrate
+17:54:47.522 * boot identity="Samyang AF 135.0mm f/1.8-22 fw1.05" version=1.05
+17:54:47.525 * tx 52542 F0 1B 00 02 8A 40 46 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 5F 01 55
+17:54:47.579 * lens pos=30988
+17:54:47.680 * lens pos=28711
+17:54:47.786 * lens pos=26412
+17:54:47.896 * lens pos=13723
+17:54:47.967 [app] prêt : Samyang AF 135.0mm f/1.8-22 fw1.05 — focus par « samyang »
+17:54:47.997 * lens pos=15323
+17:54:48.097 * lens pos=30228
+17:54:48.213 * lens pos=14253
+17:54:48.279 * rx 53306 F0 0A 00 02 00 10 00 1C 00 55
+17:54:48.284 * homing done t=53306
+17:54:48.286 * boot step=home result=ok
+17:54:48.288 * limits focal=135 source=nvs min=13723 max=30988 home=16384
+17:54:48.290 * boot step=calibrate result=stored source=nvs
+17:54:48.292 * boot caps=identity,focus_pos,focus_goto,focus_home,focus_limits,moving,stop,aperture,focal,distance,calibrate focus=samyang aperture=standard
+17:54:48.295 * tx 53309 F0 1B 00 02 B9 40 4D 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 63 01 55
+17:54:48.329 * lens btn=00
+17:54:48.332 * lens pos=14623
+17:54:48.343 * rx 53370 F0 1B 00 02 00 40 4D 00 26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 D0 00 55
+17:54:48.347 * svc main=M sub=00 data=26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:54:48.349 * lens switch_notify=ok astro=? hint=decide_a_la_premiere_bascule_M1_ou_au_premier_appui
+17:54:48.351 * lens present=1
+17:54:48.353 * boot result=ok attempts=2
+17:54:58.913 * lens std_move=-1
+17:54:58.996 * lens pos=14622
+17:54:59.029 * lens std_move=0
+17:54:59.779 * lens std_move=-1
+17:54:59.813 * lens pos=14621
+17:54:59.932 * lens pos=14601
+17:55:00.046 * lens pos=14577
+17:55:00.179 * lens pos=14550
+17:55:00.297 * lens pos=14454
+17:55:00.413 * lens pos=14392
+17:55:00.496 * lens std_move=0
+17:55:00.530 * lens pos=14384
+17:55:00.613 * lens std_move=1
+17:55:00.647 * lens pos=14409
+17:55:00.779 * lens pos=14477
+17:55:00.915 * lens pos=14565
+17:55:01.029 * lens pos=14637
+17:55:01.146 * lens pos=14697
+17:55:01.246 * lens pos=14733
+17:55:01.379 * lens pos=14757
+17:55:01.446 * lens std_move=0
+17:55:01.479 * lens pos=14760
+17:55:02.356 * rx 67383 F0 1B 00 02 00 40 57 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B5 00 55
+17:55:02.361 * lens sw=1 bouton
+17:55:02.396 * lens astro=0 source=W01+btn08
+17:55:02.400 * lens btn=08
+17:55:02.579 * lens btn=00
+17:55:02.649 * tx 67676 F0 1B 00 02 58 40 46 FB F3 44 00 00 00 00 00 00 00 00 00 00 00 00 00 00 2D 03 55
+17:55:02.653 * btn court=aller_a_la_marque result=ok
+17:55:02.697 * lens pos=14944
+17:55:02.705 * rx 67732 F0 1B 00 02 00 40 4C FB 39 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 17 02 55
+17:55:02.709 * svc main=L pi_edge=high pos=14905 data=39 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:55:02.830 * lens pos=16480
+17:55:02.934 * lens pos=17633
+17:55:02.945 * rx 67970 F0 1B 00 02 00 40 46 FB 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9E 01 55
+17:55:02.948 * svc main=F sub=FB ack=1 data=00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:55:03.046 * lens pos=17651
+17:55:05.163 * lens std_move=-1
+17:55:05.196 * lens pos=17649
+17:55:05.313 * lens pos=17640
+17:55:05.413 * lens pos=17600
+17:55:05.531 * lens pos=17582
+17:55:05.564 * lens std_move=0
+17:55:05.646 * lens pos=17582
+17:55:05.696 * lens std_move=1
+17:55:05.780 * lens pos=17585
+17:55:05.896 * lens pos=17590
+17:55:05.984 * lens std_move=0
+17:55:08.558 * rx 73585 F0 1B 00 02 00 40 57 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B5 00 55
+17:55:08.562 * lens sw=1 bouton
+17:55:08.596 * lens btn=08
+17:55:08.975 > b
+17:55:08.983 ok
+17:55:08.986 * boot lens=0 why=b
+17:55:08.989 * lens present=0
+17:55:09.118 [app] objectif disparu
+17:55:09.580 * boot step=power logic=1 motor=1
+17:55:10.097 * std step=handshake result=LENS_CS_never_high hint=on_tente_le_0x01_quand_meme
+17:55:10.102 * tx 75125 F0 29 00 02 E5 01 FF FF FF FF FF FF FF 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0B 08 55
+17:55:10.106 * rx 75130 F0 29 00 02 00 01 FF 9F 38 5D A2 60 18 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 D7 03 55
+17:55:10.109 * std step=01 reply_len=33
+17:55:10.112 * tx 75131 F0 0A 00 02 E6 07 00 F9 00 55
+17:55:10.118 * rx 75137 F0 2B 00 02 00 07 01 03 70 01 00 01 05 00 00 08 00 00 00 00 00 60 92 86 5E 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 8D 02 55
+17:55:10.124 * std step=07 reply_len=35
+17:55:10.129 * tx 75138 F0 11 00 02 E7 08 02 00 00 00 00 00 00 00 04 01 55
+17:55:10.134 * rx 75147 +0/210#5255 F0 D2 00 02 00 08 BF 11 00 19 04 00 00 80 00 13 01 00 12 E1 01 03 01 35 00 00 18 00 00 00 19 00 00 00 00 00 00 16 00 00 00 00 00 00 00 00 E0 43 00 E0 FF 84 A4 00 00 08 32 25 40 2F 00 00 00 00
+17:55:10.140 * rx 75147 +64/210#5255 00 00 00 43 25 04 32 00 00 00 00 00 00 00 F3 F3 07 FB FB 00 00 00 04 04 20 46 00 80 01 00 00 00 00 00 00 00 00 01 01 01 09 09 00 00 00 00 00 E6 80 DD 52 00 D0 DD DF F0 00 08 A0 DD E0 00 52 00
+17:55:10.146 * rx 75147 +128/210#5255 10 10 00 00 00 00 00 00 00 00 00 84 64 27 00 06 10 FF 33 00 00 00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00 0C 0C 00 00 00 00 00 00 00 05 00 01 00 05 08 00 00 07 07 FF 00 00 00 00 00 00 00
+17:55:10.154 * rx 75147 +192/210#5255 00 00 00 00 00 00 00 00 00 13 00 03 01 07 01 E7 1A 55
+17:55:10.160 * std step=08 body_flags=02 reply_len=202
+17:55:10.168 * tx 75149 F0 0B 00 02 E8 0B 60 00 60 01 55
+17:55:10.173 * rx 75153 F0 0B 00 02 00 0B 60 00 78 00 55
+17:55:10.176 * tx 75154 F0 0D 00 02 E9 09 00 00 00 00 01 01 55
+17:55:10.180 * rx 75159 F0 14 00 02 00 09 00 00 00 00 00 00 00 00 00 00 00 1F 00 55
+17:55:10.183 * tx 75160 F0 0A 00 02 EA 0D 00 03 01 55
+17:55:10.190 * rx 75165 F0 0A 00 02 00 0D 01 1A 00 55
+17:55:10.195 * std step=0B/09/0D ok
+17:55:10.198 * tx 75166 F0 0A 00 02 EB 10 1F 26 01 55
+17:55:10.201 * lens btn=08
+17:55:10.246 * lens btn=00
+17:55:10.397 * lens fnum_x10=18
+17:55:10.430 * lens pos=30988
+17:55:10.498 * lens fnum_x10=18
+17:55:10.531 * lens pos=28711
+17:55:10.647 * lens pos=14468
+17:55:10.747 * lens pos=30804
+17:55:10.863 * lens pos=14677
+17:55:10.896 * rx 75923 F0 0A 00 02 00 10 00 1C 00 55
+17:55:10.902 * homing done t=75923
+17:55:10.906 * std step=10 homing=done
+17:55:10.911 * tx 75924 F0 19 00 02 29 0A FF 7F 00 00 00 00 00 00 3F 00 00 00 00 00 00 00 0B 02 55
+17:55:10.918 * rx 75930 F0 19 00 02 00 0A FF 7F 00 00 00 00 00 00 3F 00 00 00 00 00 00 00 E2 01 55
+17:55:10.923 * std step=0A ok
+17:55:10.927 * boot step=init done=1 loop=1 rx05=29
+17:55:10.931 * tx 75932 F0 1B 00 02 2B 40 56 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 DE 00 55
+17:55:10.965 * rx 75992 F0 1B 00 02 00 40 56 00 01 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B9 00 55
+17:55:10.970 * svc main=V version=1.05 data=01 05 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:55:10.975 * boot module=samyang caps=identity,focus_pos,focus_goto,focus_home,focus_limits,moving,distance,calibrate
+17:55:10.979 * boot module=standard caps=identity,focus_pos,focus_goto,focus_home,focus_limits,moving,stop,aperture,focal,calibrate
+17:55:10.982 * boot identity="Samyang AF 135.0mm f/1.8-22 fw1.05" version=1.05
+17:55:10.988 * tx 75997 F0 1B 00 02 2F 40 46 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 04 01 55
+17:55:11.030 * lens pos=13723
+17:55:11.147 * lens pos=30988
+17:55:11.264 * lens pos=29652
+17:55:11.381 * lens pos=14550
+17:55:11.414 * rx 76441 F0 0A 00 02 00 10 00 1C 00 55
+17:55:11.420 * homing done t=76441
+17:55:11.424 * boot step=home result=ok
+17:55:11.428 * limits focal=135 source=nvs min=13723 max=30988 home=16384
+17:55:11.431 * boot step=calibrate result=stored source=nvs
+17:55:11.438 * boot caps=identity,focus_pos,focus_goto,focus_home,focus_limits,moving,stop,aperture,focal,distance,calibrate focus=samyang aperture=standard
+17:55:11.443 * tx 76444 F0 1B 00 02 4B 40 4D 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 F5 00 55
+17:55:11.464 * lens btn=00
+17:55:11.478 * rx 76505 F0 1B 00 02 00 40 4D 00 26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 D0 00 55
+17:55:11.488 * svc main=M sub=00 data=26 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:55:11.492 * lens switch_notify=ok astro=? hint=decide_a_la_premiere_bascule_M1_ou_au_premier_appui
+17:55:11.495 * lens present=1
+17:55:11.501 * boot result=ok attempts=3
+17:55:11.974 [app] prêt : Samyang AF 135.0mm f/1.8-22 fw1.05 — focus par « samyang »
+17:55:12.430 * lens std_move=1
+17:55:12.464 * lens pos=14820
+17:55:12.530 * lens std_move=-1
+17:55:12.580 * lens pos=14620
+17:55:12.646 * lens std_move=0
+17:55:15.896 * lens std_move=-1
+17:55:15.901 * lens pos=14619
+17:55:16.046 * lens pos=14525
+17:55:16.180 * lens pos=13993
+17:55:16.313 * lens pos=13793
+17:55:16.413 * lens pos=13729
+17:55:16.530 * lens pos=13723
+17:55:16.713 * lens std_move=0
+17:55:17.569 * rx 82596 F0 1B 00 02 00 40 57 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B5 00 55
+17:55:17.576 * lens sw=1 bouton
+17:55:17.780 * lens std_move=1
+17:55:17.787 * lens pos=13865
+17:55:17.879 * lens astro=1 source=W01_sans_btn08
+17:55:17.913 * lens std_move=-1
+17:55:17.920 * lens pos=14620
+17:55:18.046 * lens std_move=0
+17:55:18.663 * lens std_move=1
+17:55:18.713 * lens pos=14621
+17:55:18.830 * lens pos=14773
+17:55:18.882 * rx 83909 F0 1B 00 02 00 40 4C 00 33 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 16 01 55
+17:55:18.889 * svc main=L sub=00 data=33 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:55:18.932 * lens pos=15114
+17:55:19.046 * lens pos=15430
+17:55:19.146 * lens pos=16078
+17:55:19.263 * lens pos=16730
+17:55:19.363 * lens pos=16818
+17:55:19.480 * lens pos=16840
+17:55:19.580 * lens pos=16844
+17:55:19.613 * lens std_move=0
+17:55:19.680 * lens pos=16845
+17:55:19.697 * rx 84724 F0 1B 00 02 00 40 57 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B5 00 55
+17:55:19.705 * lens sw=1 bouton
+17:55:19.880 * lens std_move=-1
+17:55:19.896 * lens pos=16703
+17:55:20.014 * lens pos=14909
+17:55:20.030 * rx 85057 F0 1B 00 02 00 40 48 00 F2 39 00 00 00 00 00 00 00 00 00 00 00 00 00 00 D0 01 55
+17:55:20.038 * svc main=H sub=00 data=F2 39 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:55:20.130 * lens pos=14620
+17:55:20.163 * lens std_move=0
+17:55:20.846 * rx 85873 F0 1B 00 02 00 40 57 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B6 00 55
+17:55:20.851 * lens sw=2 custom_haut
+17:55:20.857 * lens switch=haut=M1=ouverture
+17:55:20.864 * rx 85873 F0 1B 00 02 00 40 57 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B7 00 55
+17:55:20.870 * lens sw=3 custom_bas
+17:55:20.876 * lens switch=bas=M2=focus
+17:55:20.883 * rx 85883 F0 1B 00 02 00 40 57 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B6 00 55
+17:55:20.891 * lens sw=2 custom_haut
+17:55:20.901 * lens switch=haut=M1=ouverture
+17:55:20.917 * ring mode=aperture source=W 0x05[62]=03
+17:55:21.278 * lens astro_mark=14620
+17:55:21.933 * lens std_move=-1
+17:55:21.982 * ring ap fnum_x10=18 source=board
+17:55:22.046 * lens std_move=0
+17:55:22.082 * ring ap fnum_x10=18 source=board
+17:55:22.180 * lens std_move=-1
+17:55:22.233 * ring ap fnum_x10=18 source=board
+17:55:22.296 * lens std_move=0
+17:55:22.332 * ring ap fnum_x10=18 source=board
+17:55:22.482 * ring ap fnum_x10=18 source=board
+17:55:22.632 * ring ap fnum_x10=18 source=board
+17:55:22.632 * lens std_move=-1
+17:55:22.763 * lens std_move=0
+17:55:22.832 * ring ap fnum_x10=18 source=board
+17:55:23.246 * ring gesture pulses=-14 (seuil 2 par tiers de diaph.)
+17:55:23.330 * lens std_move=1
+17:55:23.382 * ring ap fnum_x10=20 source=board
+17:55:23.447 * lens fnum_x10=20 std_move=0
+17:55:23.532 * ring ap fnum_x10=22 source=board
+17:55:23.581 * lens fnum_x10=22 std_move=1
+17:55:23.632 * ring ap fnum_x10=25 source=board
+17:55:23.697 * lens fnum_x10=25 std_move=0
+17:55:23.833 * ring ap fnum_x10=28 source=board
+17:55:23.839 * lens std_move=1
+17:55:23.939 * ring ap fnum_x10=32 source=board
+17:55:23.944 * lens fnum_x10=28
+17:55:24.083 * ring ap fnum_x10=35 source=board
+17:55:24.089 * lens fnum_x10=32
+17:55:24.215 * lens fnum_x10=35 std_move=0
+17:55:24.613 * ring gesture pulses=13 (seuil 2 par tiers de diaph.)
+17:55:28.888 * rx 93915 F0 1B 00 02 00 40 57 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B7 00 55
+17:55:28.894 * lens sw=3 custom_bas
+17:55:28.899 * lens switch=bas=M2=focus
+17:55:28.980 * ring mode=focus source=W 0x05[62]=03
+17:55:29.430 * lens std_move=1
+17:55:29.464 * lens pos=14621
+17:55:29.581 * lens pos=14665
+17:55:29.681 * rx 94708 F0 1B 00 02 00 40 4C 00 38 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1B 01 55
+17:55:29.689 * svc main=L sub=00 data=38 3A 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:55:29.695 * lens pos=14982
+17:55:29.814 * lens pos=15366
+17:55:29.946 * lens pos=15768
+17:55:30.047 * lens pos=16128
+17:55:30.181 * lens pos=16220
+17:55:30.331 * lens pos=16236
+17:55:30.446 * lens std_move=0
+17:55:30.453 * lens pos=16238
+17:55:31.369 * rx 96396 F0 1B 00 02 00 40 57 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B6 00 55
+17:55:31.378 * lens sw=2 custom_haut
+17:55:31.383 * lens switch=haut=M1=ouverture
+17:55:31.393 * rx 96417 F0 1B 00 02 00 40 57 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B6 00 55
+17:55:31.404 * lens sw=2 custom_haut
+17:55:31.411 * lens switch=haut=M1=ouverture
+17:55:31.430 * ring mode=aperture source=W 0x05[62]=03
+17:55:31.880 * lens std_move=1
+17:55:31.933 * ring ap fnum_x10=40 source=board
+17:55:31.981 * lens fnum_x10=40
+17:55:32.113 * lens std_move=0
+17:55:32.182 * ring ap fnum_x10=45 source=board
+17:55:32.214 * lens fnum_x10=45
+17:55:32.597 * ring gesture pulses=4 (seuil 2 par tiers de diaph.)
+17:55:33.571 * rx 98598 F0 1B 00 02 00 40 57 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B5 00 55
+17:55:33.578 * lens sw=1 bouton
+17:55:33.813 * lens std_move=-1
+17:55:33.866 * ring ap fnum_x10=40 source=board
+17:55:33.874 * lens pos=15584
+17:55:33.931 * rx 98958 F0 1B 00 02 00 40 48 00 F5 39 00 00 00 00 00 00 00 00 00 00 00 00 00 00 D3 01 55
+17:55:33.937 * svc main=H sub=00 data=F5 39 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+17:55:33.943 * ring ap fnum_x10=35 source=board
+17:55:33.947 * lens fnum_x10=40
+17:55:34.013 * lens pos=14620
+17:55:34.047 * lens fnum_x10=35 std_move=0
+17:55:34.363 * ring gesture pulses=-4 (seuil 2 par tiers de diaph.)
+17:55:35.078 * lens astro_mark=14620
+17:55:39.314 * rx 104341 F0 1B 00 02 00 40 57 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 B7 00 55
+17:55:39.322 * lens sw=3 custom_bas
+17:55:39.334 * lens switch=bas=M2=focus
+17:55:39.348 * ring mode=focus source=W 0x05[62]=03
+17:55:39.997 * lens std_move=-1
+17:55:40.030 * lens pos=14619
+17:55:40.180 * lens pos=14570
+17:55:40.281 * lens pos=14288
+17:55:40.414 * lens pos=14124
+17:55:40.530 * lens pos=14054
+17:55:40.647 * lens pos=14022
+17:55:40.764 * lens pos=14015
+17:55:40.880 * lens pos=14010
+17:55:40.913 * lens std_move=0
+17:55:40.980 * lens pos=14009

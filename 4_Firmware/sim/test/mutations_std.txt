@@ -1,0 +1,609 @@
+# SOURCE: 7_Docs/E-Mount/tamron.md — les comportements du faux objectif standard (sim/lens_std.c)
+# AUTHOR: engineer
+# DATE: 2026-09-29
+# STATUS: actif — lu par 4_Firmware/sim/test/mutants.sh après mutations.txt (joué par 4_Firmware/run.sh)
+# Les mutations qui tiennent chaque comportement du faux F051 (tuées par test_lens_std), puis l'interface commune et
+# ses adaptateurs, la liste des constats et la session contre le faux F051 (tuées par test_std et test_lens135).
+#
+# Même forme de bloc que mutations.txt :
+#   @ <programme de 4_Firmware/sim/test, sans .c> | <fichier muté, relatif à 4_Firmware/> | <fonction>
+#                        (la fonction : le nom de sa définition dans le fichier, `bash sim/test/mutants.sh --fonctions
+#                        <fichier>` ; omise pour un texte hors de toute fonction : table, macro, fichier de données)
+#   = <pourquoi le programme doit échouer : le comportement (« § n » = section de 7_Docs/E-Mount/tamron.md), le test qui tue>
+#   - <texte original>   (une ou plusieurs lignes, sans commentaire ; le tout doit apparaître exactement une fois dans
+#                        le code seul de la fonction, ou du fichier entier sans fonction,
+#                        `bash sim/test/mutants.sh --code <fichier>`)
+#   + <texte muté>       (une ou plusieurs lignes, sans commentaire)
+# Chaque mutant doit compiler (-Werror) et faire sortir le programme en 1 (une vérification échoue).
+
+# ── § 2.1, § 2.8 mise sous tension, poignée de main ──
+
+@ test_lens_std | sim/lens_std.c | reset_ram
+= § 2.1 : à la mise sous tension en flux, le 0x01 est refusé (t_power_on)
+-     l->phase = LSTD_INIT;
++     l->phase = LSTD_FLOW;
+
+@ test_lens_std | sim/lens_std.c | reset_ram
+= § 2.1 : à la mise sous tension en attente, l'init est refusée (t_power_on)
+-     l->rstate = LSTD_FREE;
++     l->rstate = LSTD_WAIT;
+
+@ test_lens_std | sim/lens_std.c | sequencer
+= poignée de main : LENS_CS levée sans attendre boot_us (t_power_on)
+-         if (l->now >= l->t_power + l->p.boot_us) l->hs = 1;
++         l->hs = 1;
+
+@ test_lens_std | sim/lens_std.c | sequencer
+= poignée de main : l'état 5 sans attendre hs_us, LENS_CS retombe trop tôt (t_power_on)
+-         if (l->now >= l->t_hs + l->p.hs_us) l->hs = 3;
++         l->hs = 3;
+
+# ── § 1.2 réponses d'init ──
+
+@ test_lens_std | sim/lens_std.c
+= réponse 0x01 : un octet de la carte des types altéré (t_init_replies)
+- static const uint8_t R01[33] = {0x01, 0xFF, 0x9F, 0x78, 0x5D, 0x82, 0x60, 0x18, 0x5E};
++ static const uint8_t R01[33] = {0x01, 0xFF, 0x9F, 0x79, 0x5D, 0x82, 0x60, 0x18, 0x5E};
+
+@ test_lens_std | sim/lens_std.c | handle
+= réponse 0x08 : le numéro de série n'est pas écrit (t_init_replies, serial = 12345678)
+-         r[28] = (uint8_t)l->p.serial;
++         r[28] = 0xFF;
+
+@ test_lens_std | sim/lens_std.c | handle
+= réponse 0x08 : l'offset 85 ne suit plus le bit 7 de la requête (t_init_replies)
+-         r[86] = (uint8_t)((r[86] & 0x7F) | (m[1] & 0x80));
++         r[86] &= 0x7F;
+
+@ test_lens_std | sim/lens_std.c | handle
+= réponse 0x0B : l'offset 0 n'est plus l'écho de la requête (t_init_replies)
+-     case 0x0B: r[0] = 0x0B; r[1] = m[1]; r[2] = 0; reply(l, 3); break;
++     case 0x0B: r[0] = 0x0B; r[1] = 0; r[2] = 0; reply(l, 3); break;
+
+@ test_lens_std | sim/lens_std.c | handle
+= réponse 0x3F : l'offset 0 écrit à zéro au lieu de rester dans le tampon (t_init_replies, après 0B 42 00)
+-         memset(r + 2, 0, 64);
++         memset(r + 1, 0, 65);
+
+# ── émission : un seul pointeur en file ──
+
+@ test_lens_std | sim/lens_std.c | queue
+= un seul pointeur : garder la première trame en file au lieu de la dernière (t_one_pointer, t_phy)
+-     l->pend = b;
+-     l->pend_len = len;
++     if (l->pend < 0) {
++         l->pend = b;
++         l->pend_len = len;
++     }
+
+# ── § 2.4, § 2.5 le 0x0A et le flux ──
+
+@ test_lens_std | sim/lens_std.c | handle
+= 0x0A : la réponse n'est plus masquée par le masque de capacités (t_0a)
+-         for (int i = 1; i < 17; i++) r[i] = MASK0A[i] & m[i];
++         for (int i = 1; i < 17; i++) r[i] = m[i];
+
+@ test_lens_std | sim/lens_std.c | layout
+= 0x0A : la mise en page retracée à chaque 0x0A (t_0a, t_stayed_powered)
+-     if (l->buf[LSTD_B05][5] != 0x05) {
++     if (1) {
+
+@ test_lens_std | sim/lens_std.c | handle
+= 0x0A : la phase init ne passe plus en flux (t_0a, t_flow)
+-         if (l->phase == LSTD_INIT) {
+-             l->phase = LSTD_FLOW;
++         if (l->phase == LSTD_INIT) {
++             l->phase = LSTD_INIT;
+
+@ test_lens_std | sim/lens_std.c | frame_tick
+= flux : la routine de trame arme les mises en file hors du flux (t_0a : pas de flux en phase init)
+-     if (l->phase == LSTD_FLOW) {
++     if (1) {
+
+@ test_lens_std | sim/lens_std.c | frame_tick
+= flux : le 0x05 part à l'échéance du 0x06 (t_flow, instants du 0x05)
+-         l->t_q05 = l->now + l->p.q05_us;
++         l->t_q05 = l->now + l->p.q06_us;
+
+@ test_lens_std | sim/lens_std.c | frame_tick
+= flux : la séquence n'avance plus à chaque routine de trame (t_flow)
+-         l->seq++;
+
+@ test_lens_std | sim/lens_std.c | dispatch
+= flux : la séquence d'une trame reçue de classe 1 n'est plus reprise (t_flow)
+-     if (f[3] == 1) l->seq = f[4];
+
+@ test_lens_std | sim/lens_std.c | fire_due
+= flux : l'horloge interne à la mauvaise période (t_flow, frame_period_us = 20 ms)
+-         l->t_frame = l->now + l->p.frame_period_us;
++         l->t_frame = l->now + 2 * l->p.frame_period_us;
+
+@ test_lens_std | sim/lens_std.c | isr06
+= flux : le pointeur d'écriture du 0x06 ne revient pas après l'envoi, l'accusé se répète (t_focus)
+-     queue(l, LSTD_B06, 2, (uint16_t)(l->w06 + 3));
+-     l->w06 = l->end06;
++     queue(l, LSTD_B06, 2, (uint16_t)(l->w06 + 3));
+
+# ── § 2.3 le refus 0x02 ──
+
+@ test_lens_std | sim/lens_std.c | send_err
+= 0x02 : l'état de réponse n'est plus remis à libre, la réponse différée survit (t_refusal, t_substates)
+-     queue(l, LSTD_BERR, 4, 16);
+-     l->rstate = LSTD_FREE;
++     queue(l, LSTD_BERR, 4, 16);
+
+@ test_lens_std | sim/lens_std.c | dispatch
+= 0x02 code 4 : le fautif n'est plus écrasé par FF, le champ type le nomme (t_refusal, ERR4)
+-         n = handle(l, &f[p], (uint32_t)rem);
+-         if (!running(l)) return;
+-         if (n == 0) {
+-             f[p] = 0xFF;
++         n = handle(l, &f[p], (uint32_t)rem);
++         if (!running(l)) return;
++         if (n == 0) {
+
+@ test_lens_std | sim/lens_std.c | dispatch
+= 0x02 codes 1-3 : la classe reçue n'est plus écrasée par FF (t_corrupt)
+-         f[3] = 0xFF;
+
+@ test_lens_std | sim/lens_std.c | dispatch
+= 0x02 : fin ≠ 55 rendue en code 2 (t_corrupt)
+-     if (f[len - 1] != 0x55) code = 1;
++     if (f[len - 1] != 0x55) code = 2;
+
+@ test_lens_std | sim/lens_std.c | dispatch
+= 0x02 : la somme n'est plus contrôlée (t_corrupt)
+-     else if ((f[len - 3] | f[len - 2] << 8) != sum) code = 3;
++     else if (0) code = 3;
+
+@ test_lens_std | sim/lens_std.c | handle
+= § 2.2 : les messages de flux acceptés en phase init (t_refusal, t_stayed_powered)
+-         (g == G_FREE && l->rstate != LSTD_FREE) || (g == G_FLOW && l->phase != LSTD_FLOW))
++         (g == G_FREE && l->rstate != LSTD_FREE))
+
+# ── § 2.6, § 5.4 les états de réponse ──
+
+@ test_lens_std | sim/lens_std.c | handle
+= § 2.6 : l'init acceptée en attente ou réponse prête (t_substates, t_refusal)
+-     if (g == G_ZERO || (g == G_INIT && (l->phase != LSTD_INIT || l->rstate != LSTD_FREE)) ||
++     if (g == G_ZERO || (g == G_INIT && l->phase != LSTD_INIT) ||
+
+@ test_lens_std | sim/lens_std.c | continuation
+= § 2.6 : la réponse différée part sans attendre defer_us (t_substates)
+-     if (l->rstate != LSTD_READY || l->now < l->t_rstate + l->p.defer_us) return;
++     if (l->rstate != LSTD_READY) return;
+
+@ test_lens_std | sim/lens_std.c | handle
+= § 5.4 : le 0x19 ne rend pas sa réponse prête, 19 00 ne vient jamais (t_substates)
+-         l->rstate = LSTD_READY; l->rtype = 0x19; l->t_rstate = l->now;
++         l->rtype = 0x19; l->t_rstate = l->now;
+
+@ test_lens_std | sim/lens_std.c | handle
+= § 5.4 : le 0x1B rend sa réponse prête au lieu de l'attente, sans attendre la condition (t_substates)
+-         l->rstate = LSTD_WAIT; l->rtype = 0x1B; l->t_rstate = l->now;
++         l->rstate = LSTD_READY; l->rtype = 0x1B; l->t_rstate = l->now;
+
+@ test_lens_std | sim/lens_std.c | continuation
+= § 5.4 : un iris_1b_us « jamais » compté comme un délai (t_substates)
+-     if (l->rstate == LSTD_WAIT && l->rtype == 0x1B && l->p.iris_1b_us != UINT64_MAX &&
++     if (l->rstate == LSTD_WAIT && l->rtype == 0x1B &&
+
+@ test_lens_std | sim/lens_std.c | continuation
+= réponse 1B : ses 10 octets ne sont plus ceux de r1b (t_substates, r1b sur deux valeurs)
+-         memcpy(r + 1, l->p.r1b, 10);
++         memset(r + 1, 0x01, 10);
+
+@ test_lens_std | sim/lens_std.c | continuation
+= § 5.4 réponse 1B : l'offset 9 n'est plus réduit à ses bits 0-2 (t_substates)
+-         r[10] &= 0x07;
++         r[10] &= 0x0F;
+
+# ── § 3 le homing ──
+
+@ test_lens_std | sim/lens_std.c | continuation
+= § 3 : 10 01 jamais émis (t_homing, homing_fails)
+-         r[1] = (uint8_t)(l->p.homing_fails ? 0x01 : 0x00);
++         r[1] = 0x00;
+
+@ test_lens_std | sim/lens_std.c | homing_task
+= § 3 : la position après homing suit le module d'iris au lieu de la mise au point (t_homing)
+-         if (l->hmask & 0x08) {
++         if (l->hmask & 0x04) {
+
+@ test_lens_std | sim/lens_std.c | homing_task
+= § 3, § 2.5 : l'étape 2 ne marque plus le module référencé, 0x06 bits 0-2 restent à 1 (t_homing)
+-         l->referenced = true;
+-         l->hstep = 3;
++         l->hstep = 3;
+
+@ test_lens_std | sim/lens_std.c | homing_task
+= § 3 : l'étape 0 n'attend plus la mise en service (t_homing, service_us)
+-         if (l->in_service) l->hstep = 1;
++         l->hstep = 1;
+
+@ test_lens_std | sim/lens_std.c | homing_task
+= § 3 : l'étape 3 ne bloque plus la boucle de fond (t_homing, homing_busy_us)
+-         l->busy_until = l->now + l->p.homing_busy_us;
++         l->busy_until = l->now;
+
+@ test_lens_std | sim/lens_std.c | handle
+= § 3 : un 0x10 pendant un homing ne le relance plus (t_homing)
+-         l->hstep = 0;
++         if (l->hstep < 0) l->hstep = 0;
+
+# ── § 4 la mise au point ──
+
+@ test_lens_std | sim/lens_std.c | pickup
+= § 4.3 : la cible n'est plus bornée en haut (t_focus, bornage)
+-     if (t > l->p.lim_high) t = l->p.lim_high;
++     if (0) t = l->p.lim_high;
+
+@ test_lens_std | sim/lens_std.c | pickup
+= § 4.3 : la cible n'est plus bornée en bas (t_focus, bornage bas, lim_low sur deux valeurs)
+-     if (t < l->p.lim_low) t = l->p.lim_low;
++     if (0) t = l->p.lim_low;
+
+@ test_lens_std | sim/lens_std.c | pickup
+= § 4.2 : une unité absolue refusée est acceptée (t_focus, unités)
+-     if (!(fl & 4)) {
+-         if (unit != 0) l->jerr = true;
++     if (!(fl & 4)) {
++         if (unit == 3) l->jerr = true;
+
+@ test_lens_std | sim/lens_std.c | pickup
+= § 4.2 : un relatif nul est décodé, son unité refusée (t_focus, relatif nul)
+-     } else if (value == 0) {
++     } else if (0) {
+
+@ test_lens_std | sim/lens_std.c | pickup
+= relatif : le signe ignoré (t_focus, +1000 puis -500)
+-         t = s < 0 ? (int32_t)pos - steps : (int32_t)pos + steps;
++         t = (int32_t)pos + steps;
+
+@ test_lens_std | sim/lens_std.c | post_acks
+= § 4.4 : l'accusé d'une unité refusée vaut 1D 00 (t_focus)
+-         ack(l, 0x1D, l->jerr ? 0x01 : 0x00);
++         ack(l, 0x1D, 0x00);
+
+@ test_lens_std | sim/lens_std.c | post_acks
+= § 4.4 : l'accusé du 0x1C vaut 1C 00 (t_focus)
+-         ack(l, 0x1C, 0x01);
++         ack(l, 0x1C, 0x00);
+
+@ test_lens_std | sim/lens_std.c | ack
+= § 4.4 : l'accusé n'est plus écrit après le 0x06 (t_focus)
+-     l->buf[LSTD_B06][l->w06 + 1] = v;
+-     l->w06 = (uint16_t)(l->w06 + 2);
++     l->buf[LSTD_B06][l->w06 + 1] = v;
+
+@ test_lens_std | sim/lens_std.c | start_job
+= § 4.4 : une consigne n'écrase plus un travail en cours, l'évincé garde son accusé (t_focus, 1D puis 1C, 1C puis 1D, 1D puis 1D)
+-     l->jtype = type;
+-     l->jdone = l->jengaged = l->jerr = false;
++     if (l->jtype != J_REST && !l->jdone) return;
++     l->jtype = type;
++     l->jdone = l->jengaged = l->jerr = false;
+
+@ test_lens_std | sim/lens_std.c | job_rest
+= S3 : le travail mis au repos n'arrête plus le moteur, le 0x1C ne l'arrête pas (t_focus)
+-     freeze(l);
+-     l->moving = false;
++     freeze(l);
+
+@ test_lens_std | sim/lens_std.c | pickup
+= § 4.3 : en butée dure basse, le travail bouge quand même (t_focus, butées)
+-     if (f_hard_low(l, pos) || f_hard_high(l, pos) || (t > pos && f_soft_high(l, pos)) || (t < pos && f_soft_low(l, pos)))
++     if (f_hard_high(l, pos) || (t > pos && f_soft_high(l, pos)) || (t < pos && f_soft_low(l, pos)))
+
+@ test_lens_std | sim/lens_std.c | pickup
+= § 4.3 : en limite logicielle haute, une cible au-dessus bouge quand même (t_focus, soft_margin côté haut)
+-     if (f_hard_low(l, pos) || f_hard_high(l, pos) || (t > pos && f_soft_high(l, pos)) || (t < pos && f_soft_low(l, pos)))
++     if (f_hard_low(l, pos) || f_hard_high(l, pos) || (t < pos && f_soft_low(l, pos)))
+
+@ test_lens_std | sim/lens_std.c | pickup
+= § 4.3 : en limite logicielle basse, une cible en dessous bouge quand même (t_focus, soft_margin côté bas)
+-     if (f_hard_low(l, pos) || f_hard_high(l, pos) || (t > pos && f_soft_high(l, pos)) || (t < pos && f_soft_low(l, pos)))
++     if (f_hard_low(l, pos) || f_hard_high(l, pos) || (t > pos && f_soft_high(l, pos)))
+
+@ test_lens_std | sim/lens_std.c | finish_check
+= § 4.3 : la butée dure ne finit plus le travail, pas d'accusé (t_focus, butées)
+-             if (f_hard_high(l, pos) || f_hard_low(l, pos)) l->jdone = true;
+
+@ test_lens_std | sim/lens_std.c | f_soft_high
+= § 4.3 : la marge des limites logicielles ignorée (t_focus, soft_margin)
+- static bool f_soft_high(const lstd_t *l, int64_t pos) { return pos >= (int64_t)l->p.soft_high - l->p.soft_margin; }
++ static bool f_soft_high(const lstd_t *l, int64_t pos) { return pos >= (int64_t)l->p.soft_high; }
+
+@ test_lens_std | sim/lens_std.c | build_content
+= 0x06 offset 0 : butées dures haute et basse inversées (t_focus, bits 5 et 6)
+-                          f_hard_high(l, pos) << 5 | f_hard_low(l, pos) << 6);
++                          f_hard_high(l, pos) << 6 | f_hard_low(l, pos) << 5);
+
+@ test_lens_std | sim/lens_std.c | build_content
+= 0x06 offset 1 : sens inversé (t_focus, bit 1 en montant)
+-         b[1] = (uint8_t)((sp > 0) << 1 | (sp < 0) << 2);
++         b[1] = (uint8_t)((sp > 0) << 2 | (sp < 0) << 1);
+
+@ test_lens_std | sim/lens_std.c | build_content
+= 0x05 offset 22 : « en mouvement » sur le bit 5 (t_focus)
+-         *b = (uint8_t)((*b & 0x3C) | (sp != 0) << 6 | (l->in_service) << 7);
++         *b = (uint8_t)((*b & 0x3C) | (sp != 0) << 5 | (l->in_service) << 7);
+
+@ test_lens_std | sim/lens_std.c | build_content
+= 0x06 bloc 2 : la limite logicielle basse publiée est la borne de la cible (t_focus, soft_low = 16000)
+-         b[5] = (uint8_t)l->p.soft_low;
++         b[5] = (uint8_t)l->p.lim_low;
+
+@ test_lens_std | sim/lens_std.c | t_arrival
+= moteur : l'arrivée calculée à 20 000 pas/s quel que soit steps_per_s (t_focus, 5000 pas/s : pas d'accusé)
+-     return l->t_m0 + (d * 1000000u + l->p.steps_per_s - 1) / l->p.steps_per_s;
++     return l->t_m0 + (d * 1000000u + l->p.steps_per_s - 1) / 20000u;
+
+@ test_lens_std | sim/lens_std.c | handle
+= § 2.4, § 4.4 : un 0x0A pendant le 1D annule son accusé (t_focus : le travail n'est pas annulé)
+-             l->phase = LSTD_INIT;
+-         }
++             l->phase = LSTD_INIT;
++             job_rest(l);
++         }
+
+@ test_lens_std | sim/lens_std.c | start_job
+= S8 : un 0x1D pendant un homing accepté sans le signaler (t_focus)
+-     if (l->hstep >= 0) {
++     if (l->hstep > 99) {
+
+@ test_lens_std | sim/lens_std.c | pickup
+= S6 : un 0x1D en unité 3 absolue traité comme une unité refusée, sans le compter non modélisé (t_focus)
+-         (!(fl & 4) && unit == 3) || ((fl & 4) && value != 0 && unit == 2)) {
++         ((fl & 4) && value != 0 && unit == 2)) {
+
+# ── § 8 l'objectif resté alimenté ──
+
+@ test_lens_std | sim/lens_std.c | lstd_start_powered
+= § 8 : resté alimenté, il repart en phase init (t_stayed_powered)
+-         layout(l, r);
+-         l->phase = LSTD_FLOW;
++         layout(l, r);
+
+# ── § 2.3 trame corrompue ──
+
+@ test_lens_std | sim/lens_std.c | dispatch
+= § 2.2 : une longueur plus courte que l'enveloppe n'est plus hors modèle (t_corrupt)
+-     if (len < 8 || off + len > LSTD_RING) {
++     if (off + len > LSTD_RING) {
+
+# ── couche physique ──
+
+@ test_lens_std | sim/lens_std.c | t_byte_end
+= LENS_CS -> premier octet sans lens_cs_lead_us (t_phy)
+-     return l->t_tx + l->p.lens_cs_lead_us + (uint64_t)(l->tx_i + 1) * l->p.byte_us;
++     return l->t_tx + (uint64_t)(l->tx_i + 1) * l->p.byte_us;
+
+@ test_lens_std | sim/lens_std.c | t_lens_cs_fall
+= LENS_CS rabaissée sans lens_cs_tail_us (t_phy)
+-     uint64_t t = l->t_tx + l->p.lens_cs_tail_us;
++     uint64_t t = l->t_tx;
+
+@ test_lens_std | sim/lens_std.c | t_tx_start
+= LENS_CS basse depuis plus de 500 µs n'est plus exigée (t_phy, 0x06 mis en file pendant le 0x05)
+-     if (l->t_lens_cs + 501 > t) t = l->t_lens_cs + 501;
++     if (l->t_lens_cs + 1 > t) t = l->t_lens_cs + 1;
+
+@ test_lens_std | sim/lens_std.c | t_tx_start
+= BODY_CS basse depuis plus de 50 µs n'est plus exigée (t_phy, loop_us = 10)
+-     if (l->t_body_cs + 51 > t) t = l->t_body_cs + 51;
++     if (l->t_body_cs + 1 > t) t = l->t_body_cs + 1;
+
+@ test_lens_std | sim/lens_std.c | t_tx_start
+= l'émission n'attend plus BODY_CS basse (t_phy, BODY_CS tenue haute)
+-     if (l->pend < 0 || l->tx_state != 0 || l->lens_cs || l->body_cs) return UINT64_MAX;
++     if (l->pend < 0 || l->tx_state != 0 || l->lens_cs) return UINT64_MAX;
+
+@ test_lens_std | sim/lens_std.c | pass
+= la trame reçue traitée sans loop_us (t_phy)
+-     if (l->q_n && l->now >= l->q_t[0] + l->p.loop_us) {
++     if (l->q_n && l->now >= l->q_t[0]) {
+
+@ test_lens_std | sim/lens_std.c | t_tx_start
+= l'émission part sans tx_poll_us (t_phy)
+-     t += l->p.tx_poll_us;
++     t += 0;
+
+@ test_lens_std | sim/lens_std.c | lstd_byte
+= réception : un octet reçu BODY_CS basse n'est plus rangé par le DMA (t_phy)
+-     if (running(l) && l->link) {
++     if (running(l) && l->link && l->body_cs) {
+
+# ── pannes ──
+
+@ test_lens_std | sim/lens_std.c | tx_task
+= panne « muet » sans effet (t_faults)
+-         if (l->f.silent) {
++         if (0) {
+
+@ test_lens_std | sim/lens_std.c | t_tx_start
+= panne « retard » appliquée aussi au flux de classe 1 (t_faults)
+-     if (l->buf[l->pend][3] != 1 && l->t_pend + l->f.delay_us > t) t = l->t_pend + l->f.delay_us;
++     if (l->t_pend + l->f.delay_us > t) t = l->t_pend + l->f.delay_us;
+
+@ test_lens_std | sim/lens_std.c | tx_task
+= panne « trame tronquée » appliquée aussi au flux de classe 1 (t_faults)
+-         if (l->buf[b][3] != 1 && l->f.truncate_after && l->f.truncate_after < l->tx_len) l->tx_len = l->f.truncate_after;
++         if (l->f.truncate_after && l->f.truncate_after < l->tx_len) l->tx_len = l->f.truncate_after;
+
+@ test_lens_std | sim/lens_std.c | mech
+= panne « position figée » sans effet (t_faults)
+-     if (!l->moving || l->f.frozen_position) return l->m0;
++     if (!l->moving) return l->m0;
+
+# ── non modélisé, bloqué, hors modèle ──
+
+@ test_lens_std | sim/lens_std.c | handle
+= un type accepté non servi n'est plus compté non modélisé (t_unmodelled, 0x26)
+-         unmodelled(l, t, "type accepté hors de ce qui est servi, sans état observable");
++         break;
+
+@ test_lens_std | sim/lens_std.c | handle
+= 0x0C accepté sans le signaler hors modèle (t_unmodelled)
+-     case 0x0C: out_of_model(l, "0x0C : changement de débit de la liaison (§ 5.3)"); break;
++     case 0x0C: break;
+
+@ test_lens_std | sim/lens_std.c | handle
+= 0x14 : l'objectif ne quitte plus l'application, il répond un 0x02 (t_unmodelled)
+-         l->blocked = true;
+-         return 0;
++         return 0;
+
+@ test_lens_std | sim/lens_std.c | handle
+= un sous-message plus long que la trame traité quand même (t_unmodelled, 0x07 d'un octet)
+-     if (n > rem) {
++     if (n > rem + 1) {
+
+# ── l'interface commune (sim/lens_sim.h) et ses adaptateurs ──
+
+@ test_std | sim/lens_sim_std.c | start_powered
+= l'adaptateur du F051 accepte le mode service, qu'il ne sait pas représenter (interface_std : mode service refusé)
+-     if (st->service || st->flow != (st->grant != NULL)) return false;
++     if (st->flow != (st->grant != NULL)) return false;
+
+@ test_std | sim/lens_sim_std.c | start_powered
+= l'adaptateur du F051 accepte une mise en page sans flux (interface_std : mise en page sans flux refusée)
+-     if (st->service || st->flow != (st->grant != NULL)) return false;
++     if (st->service || (st->flow && !st->grant)) return false;
+
+@ test_std | sim/lens_sim_std.c | start_powered
+= l'adaptateur du F051 perd la mise en page qu'on lui donne (interface_std : la mise en page de `grant`)
+-     lstd_start_powered(l, t, st->flow, st->grant);
++     lstd_start_powered(l, t, st->flow, st->flow ? (const uint8_t[16]){0xFF, 0x7F, 0, 0, 0, 0, 0, 0, 0x3F} : NULL);
+
+@ test_std | sim/lens_sim_std.c | out
+= l'adaptateur du F051 rend LENS_CS comme un octet (interface_std : LENS_CS haute, basse, haute, basse)
+-     *o = (lens_sim_out_t){x.t, x.kind == LSTD_OUT_BYTE ? LENS_SIM_BYTE : LENS_SIM_LENS_CS, x.v};
++     *o = (lens_sim_out_t){x.t, LENS_SIM_BYTE, x.v};
+
+@ test_std | sim/lens_sim_std.c | byte_us
+= l'adaptateur du F051 donne à la PHY simulée une autre durée d'octet que celle du modèle (interface_std : byte_us)
+- ->p.byte_us; }
++ ->p.lens_cs_lead_us; }
+
+@ test_std | sim/lens_sim_std.c | lens_cs_tail_us
+= l'adaptateur du F051 donne à la PHY simulée une autre retombée de LENS_CS que celle du modèle (interface_std)
+- ->p.lens_cs_tail_us; }
++ ->p.byte_us; }
+
+@ test_lens135 | sim/lens_sim_135.c | start_powered
+= l'adaptateur du 135 accepte une mise en page, qu'il perdrait (t_adapter : une mise en page refusée)
+-     if (st->grant) return false;
++     if (0) return false;
+
+@ test_lens135 | sim/lens_sim_135.c | start_powered
+= l'adaptateur du 135 perd le mode service (t_adapter : flux et mode service passés)
+-     l135_start_powered(l, t, st->flow, st->service);
++     l135_start_powered(l, t, st->flow, false);
+
+@ test_lens135 | sim/lens_sim_135.c | out
+= l'adaptateur du 135 rend LENS_CS comme un octet (t_power_on, t_handshake_uart : LENS_CS ne remonte plus)
+-     *o = (lens_sim_out_t){x.t, x.kind == L135_OUT_BYTE ? LENS_SIM_BYTE : LENS_SIM_LENS_CS, x.v};
++     *o = (lens_sim_out_t){x.t, LENS_SIM_BYTE, x.v};
+
+@ test_lens135 | sim/lens_sim.h | lens_sim_vd
+= l'interface ne transmet pas le front VD au faux objectif (t_flow, t_cadence : plus de flux)
+- static inline void lens_sim_vd(lens_sim_t l, uint64_t t) { l.ops->vd(l.self, t); }
++ static inline void lens_sim_vd(lens_sim_t l, uint64_t t) { l.ops->advance(l.self, t); }
+
+# ── la liste des constats (sim/test/constats_std.txt), lue par test_std dans la copie mutée ──
+
+@ test_std | sim/test/constats_std.txt
+= un scénario qui passe inscrit dans la liste : le constat est réglé, test_std doit rougir (homing_10_01 passe)
+- § (classe et type FF, § 2.3) ; test_std.c:reste_alimente_reset
++ § (classe et type FF, § 2.3) ; test_std.c:reste_alimente_reset
++
++ @ homing_10_01
++ = inscrit pour la mutation
++ § aucune
+
+@ test_std | sim/test/constats_std.txt
+= un scénario en échec retiré de la liste : test_std doit rougir (reste_alimente échoue, hors de la liste)
+- @ reste_alimente
+- = Le premier 0x01 n'est pas reçu comme un 0x01 : au lieu de 02 02 FF 04, le F051 rend 02 FF FF 01 puis 02 FF FF 03. La
+- = poignée de main du firmware finit par BODY_CS basse et le 0x01 la relève aussitôt ; liaison ouverte, le F051 clôt à
+- = la retombée un emplacement vide (longueur 0 lue dans l'anneau), dont le traitement, 500 µs plus tard, lit les octets
+- = du 0x01 encore incomplets (code 1) et en écrase les octets 3 et 5 ; le 0x01 complet, dans le même emplacement, échoue
+- = ensuite à sa somme (code 3). Ce que le vrai F051 fait d'un emplacement de longueur 0 n'est pas établi : modèle ou
+- = firmware, à arbitrer. C'est la seule cause qui reste : les deuxième et troisième 0x01 reçoivent 02 02 FF 04, le
+- = reset soft ramène la phase init, l'init y est servie et le firmware atteint READY, à la position du flux, sans FAULT
+- = (reste_alimente_reset).
+- § 7_Docs/E-Mount/tamron.md § 2.3, § 2.8, § 8, § 10 ; lens_std.c « Couche physique », lstd_body_cs, dispatch
+- § (classe et type FF, § 2.3) ; test_std.c:reste_alimente_reset
++ # reste_alimente retiré
+
+@ test_std | sim/test/constats_std.txt
+= un constat qui ne nomme aucun scénario : test_std doit rougir
+- § (classe et type FF, § 2.3) ; test_std.c:reste_alimente_reset
++ § (classe et type FF, § 2.3) ; test_std.c:reste_alimente_reset
++
++ @ scenario_inconnu
++ = inscrit pour la mutation
++ § aucune
+
+@ test_std | sim/test/constats_std.txt
+= un constat sans citation : test_std doit rougir (reste_alimente)
+- § 7_Docs/E-Mount/tamron.md § 2.3, § 2.8, § 8, § 10 ; lens_std.c « Couche physique », lstd_body_cs, dispatch
+- § (classe et type FF, § 2.3) ; test_std.c:reste_alimente_reset
++ = sans citation
+
+# ── E3 contre le faux F051 ──
+
+@ test_std | components/session/lens_rx.c
+= E3 : le 10 01 du F051 n'est pas lu comme un échec (homing_10_01 : FAULT, E_HOME_FAILED)
+- #define MIN10          2u
++ #define MIN10          3u
+
+# ── perte, reprise, faute contre le faux F051 ──
+
+@ test_std | components/session/init.c | init_reply
+= jamais de reset soft (muet_fault : 4 0x0A, le reset soft de chaque essai)
+-         } else if (!in.reset_done) {
++         } else if (0) {
+
+@ test_std | components/session/session.c
+= FAULT au cinquième échec (muet_fault : FAULT, E_LOST, après trois reprises)
+- #define MAX_FAILS      4 
++ #define MAX_FAILS      5 
+
+@ test_std | components/session/init.c
+= le reset soft dès le premier 0x01 sans réponse (muet_puis_repond : le même 0x01 à 300 ms, un seul 0x0A)
+- #define TRIES01        3
++ #define TRIES01        1
+
+@ test_std | components/session/session.c | on_due
+= cut_rails ignoré, la coupure jamais faite (coupure : le F051 hors tension 500 ms, il repart à froid)
+-         if (!s.p.cut_rails) {
++         if (1) {
+
+@ test_std | components/session/session.c | on_due
+= la coupure sans durée (coupure : rails rétablis 500 ms après la coupure)
+-         wait_for(S_REC_CUT, s.p.cut_ms);
++         wait_for(S_REC_CUT, 0);
+
+@ test_std | components/journal/journal.c | frame_all
+= les morceaux d'une trame entière sous LOG ALL sans un même #id (log_all_minute : la réponse au 0x08, 202 octets, jamais réassemblée)
+-             int w = n > CHUNK ? snprintf(s, sizeof s, "%s +%u/%u#%lu", pre, (unsigned)off, (unsigned)n, (unsigned long)j.frames)
++             int w = n > CHUNK ? snprintf(s, sizeof s, "%s +%u/%u#%lu", pre, (unsigned)off, (unsigned)n, (unsigned long)(j.frames + off))
+
+@ test_std | components/journal/journal.c
+= le 0x05 reçu jamais en différence (log_all_minute : neuf trames sur dix en différence)
+- static const struct { bool rx; uint8_t type; } KEYS[N_REF] = {{false, 0x03}, {false, 0x04}, {true, 0x02}, {true, 0x05},
++ static const struct { bool rx; uint8_t type; } KEYS[N_REF] = {{false, 0x03}, {false, 0x04}, {true, 0x02}, {true, 0x06},
+
+@ test_std | components/txn/txn.c | bsk_txn_on_event
+= LOG ALL retarde le 0x04 (log_all_minute : la paire à VD + 10,1 ms sous LOG ALL, contre le faux F051)
+-             x.at04 = e->t_us + PAIR04_US;
++             x.at04 = e->t_us + PAIR04_US + (bsk_journal_all() ? 1000u : 0u);
+
+# ── le 0x08 de l'init, 06 pour un Samyang reconnu seul ──
+
+@ test_std | components/session/init.c | body08_flags
+= le 0x08 porte 06 pour tout objectif (demarrage_froid : le F051, drapeaux 00)
+- in.samyang ? 0x06 : 0x00
++ in.samyang ? 0x06 : 0x06
